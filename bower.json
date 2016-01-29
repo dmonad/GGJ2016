@@ -1,0 +1,25 @@
+{
+  "name": "GGJ16",
+  "main": "index.js",
+  "homepage": "https://github.com/DadaMonad/GGJ2016",
+  "authors": [
+    "Kevin Jahns <kevin.jahns@rwth-aachen.de>"
+  ],
+  "description": "",
+  "moduleType": [],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "PhysicsJS": "physicsjs#~0.7.0",
+    "pixi.js": "pixijs/pixi.js#~3.0.9",
+    "TweenJS": "CreateJs/TweenJs#~0.6.2",
+    "tween.js": "tweenjs#~16.3.4",
+    "requirejs": "~2.1.22"
+  }
+}
