@@ -72,6 +72,9 @@ var Composite = Matter.Composite,
         render.textures = {};
         render.sprites = {};
         render.primitives = {};
+        
+        render.constraintContainer = new PIXI.Container();
+        render.container.addChild(render.constraintContainer);
 
         // use a sprite batch for performance
         render.spriteContainer = new PIXI.Container();
@@ -98,7 +101,8 @@ var Composite = Matter.Composite,
      */
     RenderPixi2.clear = function(render) {
         var container = render.container,
-            spriteContainer = render.spriteContainer;
+            spriteContainer = render.spriteContainer,
+            constraintContainer = render.constraintContainer;
 
         // clear stage container
         while (container.children[0]) { 
@@ -108,6 +112,11 @@ var Composite = Matter.Composite,
         // clear sprite batch
         while (spriteContainer.children[0]) { 
             spriteContainer.removeChild(spriteContainer.children[0]); 
+        }
+
+        // clear sprite batch
+        while (constraintContainer.children[0]) { 
+            constraintContainer.removeChild(constraintContainer.children[0]); 
         }
 
         var bgSprite = render.sprites['bg-0'];
@@ -121,6 +130,8 @@ var Composite = Matter.Composite,
         render.sprites['bg-0'] = bgSprite;
         if (bgSprite)
             container.addChildAt(bgSprite, 0);
+            
+        render.container.addChild(render.constraintContainer);            
 
         // add sprite batch back into container
         render.container.addChild(render.spriteContainer);
@@ -250,7 +261,7 @@ var Composite = Matter.Composite,
             bodyB = constraint.bodyB,
             pointA = constraint.pointA,
             pointB = constraint.pointB,
-            container = render.container,
+            container = render.constraintContainer,
             constraintRender = constraint.render,
             primitiveId = 'c-' + constraint.id,
             primitive = render.primitives[primitiveId];

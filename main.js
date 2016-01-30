@@ -13,7 +13,7 @@ var Engine = Matter.Engine,
     Body = Matter.Body;
 
 // create a Matter.js engine
-var engine = Engine.create(document.body, {render: RenderPixi2.create({element: document.body, options: {debug: true}}) });
+var engine = Engine.create(document.body, {render: RenderPixi2.create({element: document.body, options: {debug: false}}) });
 
 // create two boxes and a ground
 var boxA = Bodies.rectangle(400, 200, 80, 80);
@@ -84,7 +84,7 @@ $.get('./img/'+organ+'.svg').done(function(data) {
                     }, true);
                 
                     var liverConstraint = Constraint.create({ 
-                                // bodyB: liver,
+                                bodyB: liver,
                                 pointB: { x: 0, y: 0 },
                                 bodyA: circle,
                                 pointA: { x: 0, y: 0 },
@@ -101,8 +101,6 @@ $.get('./img/'+organ+'.svg').done(function(data) {
                 
 var mouseConstraint = MouseConstraint.create(engine);
 
-/*
-
 var mouseConstraint = MouseConstraint.create(engine, {
     collisionFilter: {
                 category: 0x0001,
@@ -115,7 +113,6 @@ var mouseConstraint = MouseConstraint.create(engine, {
                 console.log(event.mouse.position)
                 Body.setPosition(circle, { x: event.mouse.position.x, y: event.mouse.position.y });
             })
-            */
 
 // add all of the bodies to the world
 World.add(engine.world, [boxA, boxB, ground, mouseConstraint, circle]);
