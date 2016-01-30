@@ -29,29 +29,36 @@ function randomProperty (obj) {
 
 var organs = {
     liver: {
-        w: 150,
-        h: 150/585*370
+        width: 585,
+        height: 370,
+        scale: 150/585
     },
     heart: {
-        w: 150,
-        h: 150/500*503
+        width: 500,
+        height: 503,
+        scale: 150/500
     },
     kidney: {
-        w: 150,
-        h: 150/234*365
+        width: 234,
+        height: 365,
+        scale: 150/234
     },
     lungs: {
-        w: 150,
-        h: 150/650*652
+        width: 650,
+        height: 652,
+        scale: 150/650
     },
     stomach: {
-        w: 150,
-        h: 150/642*579
+        width: 642,
+        height: 579,
+        scale: 150/642
     },
 };
 var organ = randomProperty(organs);
-var targetWidth = organs[organ].w;
-var targetHeight = organs[organ].h;
+var imgWidth = organs[organ].width;
+var imgHeight = organs[organ].height;
+var targetWidth = imgWidth * organs[organ].scale;
+var targetHeight = imgHeight * organs[organ].scale;
 
 $.get('./img/'+organ+'.svg').done(function(data) {
                     var path = $(data).find('path')[0];
@@ -62,10 +69,7 @@ $.get('./img/'+organ+'.svg').done(function(data) {
                     var cy = (bds.min.y + bds.max.y) / 2;
                     var pathWidth = bds.max.x - bds.min.x;
                     var pathHeight = bds.max.y - bds.min.y;
-                    var imgWidth = 585, imgHeight = 370;
-                    var vertices = Vertices.scale(points, targetWidth / pathWidth*0.98, targetHeight / pathHeight*0.98);
-                    var offx = (cx - center.x) / pathWidth;
-                    var offy = (cy - center.y) / pathHeight;
+                    var vertices = Vertices.scale(points, targetWidth / pathWidth*0.95, targetHeight / pathHeight*0.95);
                     
                     var liver = Bodies.fromVertices(350, 10, [vertices], {
                         render: {
@@ -75,8 +79,6 @@ $.get('./img/'+organ+'.svg').done(function(data) {
                                 texture: './img/'+organ+'.png',
                                 xScale: targetWidth / imgWidth,
                                 yScale: targetHeight / imgHeight,
-                                //xOffset: -offx,
-                                //yOffset: -offy,
                             }
                         }
                     }, true);
