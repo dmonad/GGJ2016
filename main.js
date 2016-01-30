@@ -114,7 +114,7 @@ function createLevel () {
     }
   })
 
-  World.add(engine.world, [MouseConstraint.create(engine)])
+  // World.add(engine.world, [MouseConstraint.create(engine)])
 
   for (var i = 0; i < level.targetZones.length; i++) {
     var zone = level.targetZones[i]
@@ -125,7 +125,7 @@ function createLevel () {
 
     engine.render.textContainer.addChild(graphics)
   }
-  
+
   refreshScore()
 }
 
@@ -146,7 +146,6 @@ renderOptions.showAngleIndicator = false
 renderOptions.wireframes = false
 renderOptions.showConvexHull = true
 engine.enableSleeping = true
-
 
 waitForSword(engine)
 
