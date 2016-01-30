@@ -1,4 +1,8 @@
 // Place your settings in this file to overwrite default and user settings.
 {
- 	"javascript.validate.syntaxValidation": false 
+ 	"javascript.validate.syntaxValidation": false ,
+     "standard.options": {
+         "globals": ["Matter", "RenderPixi2", "$", "createjs", "PIXI"]
+     },
+     "editor.tabSize": 2
 }
