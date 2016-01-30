@@ -30,10 +30,12 @@ World.add(engine.world, [
     Bodies.rectangle(340, 580, 700, 20, { isStatic: true, angle: Math.PI * 0.04 })
 ]);
 
-var mouseConstraint = MouseConstraint.create(engine);
+
 // World.add(engine.world, mouseConstraint);
 
 var sword = Bodies.circle(100, 100, 20, {
+  restitution: 0,
+  frictionAir: 0,
   render: {
     sprite: {
       texture: '/img/sword.png',
@@ -45,6 +47,7 @@ var sword = Bodies.circle(100, 100, 20, {
 World.add(engine.world, [sword])
 
 function swordContraint (sword) {
+  var mouseConstraint = MouseConstraint.create(engine);
   var moveswordto
   var sworddirection = 0
   Matter.Events.on(mouseConstraint, 'mousedown', function (event){
