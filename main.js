@@ -85,11 +85,9 @@ $.get('./img/'+organ+'.svg').done(function(data) {
                 
                     var liverConstraint = Constraint.create({ 
                                 bodyB: liver,
-                                pointB: { x: 0, y: 0 },
                                 bodyA: circle,
-                                pointA: { x: 0, y: 0 },
                                 stiffness: 0.8,
-                                length: 100,
+                                length: 200,
                                 render: {
                                     lineWidth: 10,
                                     strokeStyle: '#880000'
