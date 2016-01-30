@@ -192,8 +192,11 @@ function activateExplodeChakra (engine, pos) {
     })) {
       var force = Vector.sub(body.position, pos)
       var dist = Vector.magnitude(force)
-      if (dist < 400) {
-        force = Vector.mult(force, 0.1 * Math.sqrt((400 - dist) / 400))
+      if (dist < 600) {
+        // var power = 0.01 * Math.min(Math.sqrt((600 - dist) / 600), 0.1)
+        var power = 0.03 * Math.pow((600 - dist)/600,4)
+        console.log(power)
+        force = Vector.mult(force, power)
         Body.applyForce(body, pos, force)
       }
     }
@@ -202,6 +205,7 @@ function activateExplodeChakra (engine, pos) {
 
 function putExplodeChakra (engine, pos) {
   var chakra = Bodies.circle(pos.x, pos.y, 20, {
+    collisionFilter: {group: noncolliding},
     restitution: 0,
     frictionAir: 0,
     isStatic: true,
@@ -329,6 +333,7 @@ function createOrgan (organ, x, y, scale) {
   var vertices = Vertices.scale(organ._path, organ._width * scale / pathWidth, organ._height * scale / pathHeight)
 
   var o = Bodies.fromVertices(x, y, [vertices], {
+    collisionFilter: {group: noncolliding},
     render: {
       fillStyle: 'none',
       strokeStyle: '#FF0000',

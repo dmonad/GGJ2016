@@ -86,16 +86,38 @@ var level = {
 }
 
 function createLevel () {
-  createBone(30, 30, 780, 30, 40)
-  createBone(30, 85, 30, 515, 40)
-  createBone(50, 570, 750, 570, 40)
-  createBone(770, 85, 770, 515, 40)
+  createBone(30, 30, 780, 30, 20)
+  createBone(30, 85, 30, 515, 20)
+  createBone(50, 570, 750, 570, 20)
+  createBone(770, 85, 770, 515, 20)
 
-  createOrgan('lungs', 200, 400, 0.2)
+  var lung = createOrgan('lungs', 300, 300, 0.1)
 
-  createOrgan('liver', 400, 400, 0.2)
+  var heart = createOrgan('heart', 600, 350, 0.2)
 
-  createOrgan('heart', 600, 400, 0.2)
+  attachWithRope(engine.world, {
+    fromPoint: {x:200,y:100},
+    to: lung
+  })
+  attachWithRope(engine.world, {
+    fromPoint: {x:400, y:100},
+    to: lung
+  })
+  
+  attachWithRope(engine.world, {
+    fromPoint: {x:600, y:170},
+    to: heart
+  })
+  
+  putExplodeChakra(engine, {
+    x: 200,
+    y: 370
+  })
+  
+  putExplodeChakra(engine, {
+    x: 600,
+    y: 450
+  })
 
   Events.on(engine, 'tick', function (event) {
     for (var i = 0; i < level.targetZones.length; i++) {
@@ -147,6 +169,11 @@ renderOptions.wireframes = false
 renderOptions.showConvexHull = true
 engine.enableSleeping = true
 
+// DEBUG
+var mouseConstraint = MouseConstraint.create(engine)
+Matter.Events.on(mouseConstraint, 'mousemove', function (event) {
+  console.log(JSON.stringify(event.mouse.position))
+})
 
 waitForSword(engine)
 
