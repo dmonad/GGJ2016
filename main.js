@@ -15,12 +15,88 @@ var Engine = Matter.Engine,
 // create a Matter.js engine
 var engine = Engine.create(document.body, {render: RenderPixi2.create({element: document.body, options: {debug: false}}) });
 
-// create two boxes and a ground
-var boxA = Bodies.rectangle(400, 200, 80, 80);
-var boxB = Bodies.rectangle(450, 50, 80, 80);
-var ground = Bodies.rectangle(400, 610, 810, 60, { isStatic: true });
+var boneWidth = 116;
+var boneHeadWidth = 209;
+var boneHeadHeight = 146;
+var boneGroup = Body.nextGroup(true);
 
-var circle = Bodies.circle(100, 100, 5, { isStatic: true });
+function createBone(x1, y1, x2, y2, w, cb) {
+    $.get('./img/bone_end_collision.svg').done(function(data) {
+        var h = Math.sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2))
+        var cx = (x1 + x2) / 2;
+        var cy = (y1 + y2) / 2;
+        var w2 = w * boneHeadWidth / boneWidth;
+        var shaftScale = w / boneWidth;
+                    var path = $(data).find('path')[0];
+                    var points = Svg.pathToVertices(path, 10);
+                    var bds = Bounds.create(points);
+                    var pathWidth = bds.max.x - bds.min.x;
+        var headScale = w2 / pathWidth*0.95;
+                    var vertices = Vertices.scale(points, headScale, headScale);
+                    
+                    var end1 = Bodies.fromVertices(cx, cy - h/2, [vertices], {
+                        render: {
+                            fillStyle: 'none',
+                            strokeStyle: '#FF0000',
+                            sprite: {
+                                texture: 'img/bone_end.png',
+                                xScale: w2 / boneHeadWidth,
+                                yScale: w2 / boneHeadWidth,
+                            }
+                        },
+                        collisionFilter: { group: boneGroup },
+                        isStatic: true
+                    }, true);
+                    var end2 = Bodies.fromVertices(cx, cy + h/2, [vertices], {
+                        render: {
+                            fillStyle: 'none',
+                            strokeStyle: '#FF0000',
+                            sprite: {
+                                texture: 'img/bone_end.png',
+                                xScale: w2 / boneHeadWidth,
+                                yScale: w2 / boneHeadWidth,
+                            }
+                        },
+                        angle: Math.PI,
+                        collisionFilter: { group: boneGroup },
+                        isStatic: true
+                    }, true);
+                    
+                    console.log(cx, cy, w, h);
+                    
+                    var shaft = Bodies.rectangle(cx, cy, w, h, { 
+                        render: {
+                            sprite: {
+                                texture: 'img/bone.png',
+                                xScale: shaftScale,
+                                yScale: h
+                            }
+                        },
+                        collisionFilter: { group: boneGroup },
+                        isStatic: true
+                    });
+                    
+                    var angle = -Math.atan((x1-x2)/(y1-y2));
+                    
+                    console.log(angle/(2*Math.PI)*360);
+                    
+                    var bone = Composite.create({bodies: [shaft, end1, end2] });
+                    Composite.rotate(bone, angle, {x: cx, y: cy});
+                    
+                    World.add(engine.world, bone);
+                    
+                    if (typeof cb === 'function') {
+                        cb(bone);
+                    }
+                });
+}
+
+createBone(30, 30, 780, 30, 40);
+createBone(30, 85, 30, 515, 40);
+createBone(50, 570, 750, 570, 40);
+createBone(770, 85, 770, 515, 40);
+
+var circle = Bodies.circle(500, 100, 5, { isStatic: true });
 
 function randomProperty (obj) {
     var keys = Object.keys(obj)
@@ -71,7 +147,7 @@ $.get('./img/'+organ+'.svg').done(function(data) {
                     var pathHeight = bds.max.y - bds.min.y;
                     var vertices = Vertices.scale(points, targetWidth / pathWidth*0.95, targetHeight / pathHeight*0.95);
                     
-                    var liver = Bodies.fromVertices(350, 10, [vertices], {
+                    var liver = Bodies.fromVertices(350, 200, [vertices], {
                         render: {
                             fillStyle: 'none',
                             strokeStyle: '#FF0000',
@@ -99,6 +175,7 @@ $.get('./img/'+organ+'.svg').done(function(data) {
                 
 var mouseConstraint = MouseConstraint.create(engine);
 
+/*
 var mouseConstraint = MouseConstraint.create(engine, {
     collisionFilter: {
                 category: 0x0001,
@@ -111,9 +188,10 @@ var mouseConstraint = MouseConstraint.create(engine, {
                 console.log(event.mouse.position)
                 Body.setPosition(circle, { x: event.mouse.position.x, y: event.mouse.position.y });
             })
+            */
 
 // add all of the bodies to the world
-World.add(engine.world, [boxA, boxB, ground, mouseConstraint, circle]);
+World.add(engine.world, [mouseConstraint, circle]);
 
         var renderOptions = engine.render.options;
         renderOptions.showAngleIndicator = false;
