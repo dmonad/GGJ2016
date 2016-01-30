@@ -22,6 +22,25 @@ var chainStyle = {
 // chakras!!
 var explodeChakraIsActivated = false
 
+var emitters = []
+function startParticles (engine) {
+  Matter.Events.on(engine, 'tick', function addEmitter () {
+    for (var i = 0; i < emitters.length; i++) {
+      var emitter = emitters[i]
+      if (emitter._body) {
+        emitter.updateSpawnPos(emitter._body.position.x, emitter._body.position.y)
+      }
+
+      if (emitter._remove) {
+        emitters.splice(i, 1)
+        i--
+      } else {
+        emitter.update(1 / 60)
+      }
+    }
+  })
+}
+
 /*
   opts = {
     fromPoint: {x:0,y:0},
@@ -40,6 +59,87 @@ function attachWithRope (world, opts) { // from, body, bodyPoint, length) {
       var i = ropeB.bodies.indexOf(self)
       Matter.Composite.removeConstraintAt(ropeB, i)
     }, 0)
+    console.log(self)
+    var emitSettings = {
+      'alpha': {
+        'start': 0.77,
+        'end': 0
+      },
+      'scale': {
+        'start': 0.25,
+        'end': 0.01,
+        'minimumScaleMultiplier': 1
+      },
+      'color': {
+        'start': '#c20017',
+        'end': '#8a1111'
+      },
+      'speed': {
+        'start': 100,
+        'end': 50
+      },
+      'acceleration': {
+        'x': 0,
+        'y': 300
+      },
+      'startRotation': {
+        'min': 30,
+        'max': 180
+      },
+      'rotationSpeed': {
+        'min': 1,
+        'max': 2
+      },
+      'lifetime': {
+        'min': 0.2,
+        'max': 0.8
+      },
+      'blendMode': 'normal',
+      'frequency': 0.001,
+      'emitterLifetime': 2,
+      'maxParticles': 500
+    }
+
+    var emitter, body, e
+
+    var j = ropeB.bodies.indexOf(self)
+    if (j < ropeB.bodies.length - 1) {
+      body = ropeB.bodies[j + 1]
+      e = $.extend({}, emitSettings)
+      e.pos = { x: body.position.x, y: body.position.y }
+
+      emitter = new cloudkid.Emitter(engine.render.textContainer, [PIXI.Texture.fromImage('img/particle.png')], e)
+      emitter._body = body
+      emitter.emit = true
+      emitters.push(emitter)
+      window.setTimeout(function () {
+        emitter._remove = true
+      }, 4000)
+    }
+    body = ropeB.bodies[j]
+    e = $.extend({}, emitSettings)
+    e.pos = { x: body.position.x, y: body.position.y }
+
+    emitter = new cloudkid.Emitter(engine.render.textContainer, [PIXI.Texture.fromImage('img/particle.png')], e)
+    emitter._body = body
+    emitter.emit = true
+    emitters.push(emitter)
+    window.setTimeout(function () {
+      emitter._remove = true
+    }, 4000)
+
+    e = $.extend({}, emitSettings)
+    e.pos = { x: self.position.x, y: self.position.y }
+    e.startRotation = { min: 0, max: 360 }
+    e.emitterLifetime = 0.2
+
+    emitter = new cloudkid.Emitter(engine.render.textContainer, [PIXI.Texture.fromImage('img/particle.png')], e)
+    emitter.emit = true
+    emitters.push(emitter)
+    window.setTimeout(function () {
+      emitter._remove = true
+    }, 4000)
+
   }
   var ropeB = Matter.Composites.stack(opts.fromPoint.x, opts.fromPoint.y, 1, Math.ceil(length / 40), 20, 25, function (x, y) {
     var c = Matter.Bodies.circle(x, y, 5, {
@@ -214,7 +314,7 @@ function activateExplodeChakra (engine, pos) {
       var dist = Vector.magnitude(force)
       if (dist < 600) {
         // var power = 0.01 * Math.min(Math.sqrt((600 - dist) / 600), 0.1)
-        var power = 0.03 * Math.pow((600 - dist)/600,4)
+        var power = 0.03 * Math.pow((600 - dist) / 600, 4)
         console.log(power)
         force = Vector.mult(force, power)
         Body.applyForce(body, pos, force)
@@ -231,7 +331,7 @@ function putExplodeChakra (engine, pos) {
     isStatic: true,
     render: {
       sprite: {
-        texture: '/img/cat.png',
+        texture: 'img/yinyang.png',
         xScale: 0.1,
         yScale: 0.1
       }

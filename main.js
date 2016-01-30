@@ -45,6 +45,7 @@ function loadFiles () {
   queue.loadFile('img/bone.png', false)
   queue.loadFile('img/foreground.png', false)
   queue.loadFile('img/background.png', false)
+  queue.loadFile('img/yinyang.png', false)
 
   queue.on('complete', function () {
     engine.render.textContainer.removeChild(loadingText)
@@ -141,24 +142,24 @@ function createLevel () {
   var heart = createOrgan('heart', 600, 350, 0.2)
 
   attachWithRope(engine.world, {
-    fromPoint: {x:200,y:100},
+    fromPoint: {x: 200,y: 100},
     to: lung
   })
   attachWithRope(engine.world, {
-    fromPoint: {x:400, y:100},
+    fromPoint: {x: 400, y: 100},
     to: lung
   })
-  
+
   attachWithRope(engine.world, {
-    fromPoint: {x:600, y:170},
+    fromPoint: {x: 600, y: 170},
     to: heart
   })
-  
+
   putExplodeChakra(engine, {
     x: 200,
     y: 370
   })
-  
+
   putExplodeChakra(engine, {
     x: 600,
     y: 450
@@ -193,6 +194,7 @@ function createLevel () {
     engine.render.textContainer.addChild(graphics)
   }
 
+  startParticles(engine)
   refreshScore()
 }
 
@@ -213,11 +215,6 @@ renderOptions.showAngleIndicator = false
 renderOptions.wireframes = false
 renderOptions.showConvexHull = true
 engine.enableSleeping = true
-
-var mouseConstraint = MouseConstraint.create(engine)
-Matter.Events.on(mouseConstraint, 'mousemove', function (event) {
-  console.log(JSON.stringify(event.mouse.position))
-})
 
 waitForSword(engine)
 
