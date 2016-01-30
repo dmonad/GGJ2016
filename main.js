@@ -82,30 +82,6 @@ function buildPaths () {
   }
 }
 
-var level = {
-  organs: [],
-  targetZones: [{
-    min: {
-      x: 50,
-      y: 500
-    },
-    max: {
-      x: 200,
-      y: 560
-    }
-  }, {
-    min: {
-      x: 500,
-      y: 60
-    },
-    max: {
-      x: 700,
-      y: 150
-    }
-  }],
-  score: 0
-}
-
 function createBox () {
   var boxTop = Bodies.rectangle(canvasWidth / 2, margin / 2, canvasWidth, margin, {
     render: { visible: false },
@@ -129,41 +105,7 @@ function createBox () {
 
 function createLevel () {
   createBox()
-
-  /*
-  createBone(30, 30, 780, 30, 40)
-  createBone(30, 85, 30, 515, 40)
-  createBone(50, 570, 750, 570, 40)
-  createBone(770, 85, 770, 515, 40)
-  */
-
-  var lung = createOrgan('lungs', 300, 300, 0.1)
-
-  var heart = createOrgan('heart', 600, 350, 0.2)
-
-  attachWithRope(engine.world, {
-    fromPoint: {x: 200,y: 100},
-    to: lung
-  })
-  attachWithRope(engine.world, {
-    fromPoint: {x: 400, y: 100},
-    to: lung
-  })
-
-  attachWithRope(engine.world, {
-    fromPoint: {x: 600, y: 170},
-    to: heart
-  })
-
-  putExplodeChakra(engine, {
-    x: 200,
-    y: 370
-  })
-
-  putExplodeChakra(engine, {
-    x: 600,
-    y: 450
-  })
+  var level = window.levels[location.hash](engine)
 
   Events.on(engine, 'tick', function (event) {
     for (var i = 0; i < level.targetZones.length; i++) {
@@ -175,15 +117,13 @@ function createLevel () {
           World.remove(engine.world, result[j])
           level.organs.splice(level.organs.indexOf(result[j]), 1)
           level.score++
-          refreshScore()
+          refreshScore(level)
           break
         }
       }
     }
   })
-
-  // World.add(engine.world, [MouseConstraint.create(engine)])
-
+  refreshScore(level)
   for (var i = 0; i < level.targetZones.length; i++) {
     var zone = level.targetZones[i]
     var graphics = new PIXI.Graphics()
@@ -191,7 +131,7 @@ function createLevel () {
     graphics.beginFill(0x0088FF, 0.2)
     graphics.drawRect(zone.min.x, zone.min.y, zone.max.x - zone.min.x, zone.max.y - zone.min.y)
 
-    engine.render.textContainer.addChild(graphics)
+    engine.render.backgroundContainer.addChild(graphics)
   }
 
   startParticles(engine)
@@ -199,7 +139,7 @@ function createLevel () {
 }
 
 var scoreText
-function refreshScore () {
+function refreshScore (level) {
   if (!scoreText) {
     scoreText = new PIXI.Text('Score: 0', {font: '24px Arial', fill: 0xff1010, align: 'center'})
     engine.render.textContainer.addChild(scoreText)
@@ -216,7 +156,14 @@ renderOptions.wireframes = false
 renderOptions.showConvexHull = true
 engine.enableSleeping = true
 
-waitForSword(engine)
-
 // run the engine
 Engine.run(engine)
+
+waitForSword(engine)
+
+function clearGame () {
+  while (engine.render.backgroundContainer.children[1]) { 
+    engine.render.backgroundContainer.removeChild(engine.render.backgroundContainer.children[1]); 
+  }
+  Matter.World.clear(engine.world, false, true)
+}

@@ -126,10 +126,6 @@ var Composite = Matter.Composite,
         while (constraintContainer.children[0]) { 
             constraintContainer.removeChild(constraintContainer.children[0]); 
         }
-        
-        while (render.backgroundContainer.children[1]) { 
-            render.backgroundContainer.removeChild(render.backgroundContainer.children[1]); 
-        }
 
         var bgSprite = render.sprites['bg-0'];
 

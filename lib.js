@@ -444,7 +444,7 @@ var organs = {
   },
 }
 
-function createOrgan (organ, x, y, scale) {
+function createOrgan (organ, x, y, scale, level) {
   scale = scale || 1
   organ = organs[organ]
   var bds = organ._bounds
