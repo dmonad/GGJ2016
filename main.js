@@ -123,7 +123,6 @@ function createLevel () {
       }
     }
   })
-  refreshScore(level)
   for (var i = 0; i < level.targetZones.length; i++) {
     var zone = level.targetZones[i]
     var graphics = new PIXI.Graphics()
@@ -135,7 +134,7 @@ function createLevel () {
   }
 
   startParticles(engine)
-  refreshScore()
+  refreshScore(level)
 }
 
 var scoreText
