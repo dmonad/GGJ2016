@@ -61,3 +61,127 @@ function attachWithRope(world, from, body, length) {
   }));
   World.add(world, [ropeB])
 }
+
+var boneWidth = 116;
+var boneHeadWidth = 209;
+var boneHeadHeight = 146;
+var boneGroup = Body.nextGroup(true);
+
+var _boneHeadCache = {}
+
+function createBone(x1, y1, x2, y2, w) {
+    var vertices;
+    
+        var h = Math.sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2))
+        var cx = (x1 + x2) / 2;
+        var cy = (y1 + y2) / 2;
+        var scale = w / boneWidth;
+        
+        if (_boneHeadCache[w]) {
+            vertices = _boneHeadCache[w];
+        } else {        
+            var pathWidth = boneEndBounds.max.x - boneEndBounds.min.x;
+            var pathHeight = boneEndBounds.max.y - boneEndBounds.min.y;
+            var headScaleX = scale * boneHeadWidth / pathWidth*0.95;
+            var headScaleY = scale * boneHeadHeight / pathHeight*0.95;
+        
+            vertices = Vertices.scale(Vertices.create(boneEndPath), headScaleX, headScaleY);            
+        }
+                    
+                    var end1 = Bodies.fromVertices(cx, cy - h/2, [vertices], {
+                        render: {
+                            fillStyle: 'none',
+                            strokeStyle: '#FF0000',
+                            sprite: {
+                                texture: 'img/bone_end.png',
+                                xScale: scale,
+                                yScale: scale,
+                            }
+                        },
+                        collisionFilter: { group: boneGroup },
+                        isStatic: true
+                    }, true);
+                    var end2 = Bodies.fromVertices(cx, cy + h/2, [vertices], {
+                        render: {
+                            fillStyle: 'none',
+                            strokeStyle: '#FF0000',
+                            sprite: {
+                                texture: 'img/bone_end.png',
+                                xScale: scale,
+                                yScale: scale,
+                            }
+                        },
+                        angle: Math.PI,
+                        collisionFilter: { group: boneGroup },
+                        isStatic: true
+                    }, true);
+                    
+                    var shaft = Bodies.rectangle(cx, cy, w, h, { 
+                        render: {
+                            sprite: {
+                                texture: 'img/bone.png',
+                                xScale: scale,
+                                yScale: h
+                            }
+                        },
+                        collisionFilter: { group: boneGroup },
+                        isStatic: true
+                    });
+                    
+                    var angle = -Math.atan((x1-x2)/(y1-y2));
+                    
+                    var bone = Composite.create({bodies: [shaft, end1, end2] });
+                    Composite.rotate(bone, angle, {x: cx, y: cy});
+                    
+                    World.add(engine.world, bone);
+                    
+                    return bone;
+}
+
+var organs = {
+    liver: {
+        image: 'img/liver.png',
+        collision: 'img/liver.svg',
+    },
+    heart: {
+        image: 'img/heart.png',
+        collision: 'img/heart.svg',
+    },
+    kidney: {
+        image: 'img/kidney.png',
+        collision: 'img/kidney.svg',
+    },
+    lungs: {
+        image: 'img/lungs.png',
+        collision: 'img/lungs.svg',
+    },
+    stomach: {
+        image: 'img/stomach.png',
+        collision: 'img/stomach.svg',
+    },
+};
+
+function createOrgan(organ, x, y, scale) {
+    scale = scale || 1;
+    organ = organs[organ];
+                    var bds = organ._bounds;
+                    var pathWidth = bds.max.x - bds.min.x;
+                    var pathHeight = bds.max.y - bds.min.y;
+                    var vertices = Vertices.scale(organ._path, organ._width * scale / pathWidth, organ._height * scale / pathHeight);
+                    
+                    var o = Bodies.fromVertices(x, y, [vertices], {
+                        render: {
+                            fillStyle: 'none',
+                            strokeStyle: '#FF0000',
+                            sprite: {
+                                texture: organ.image,
+                                xScale: scale,
+                                yScale: scale
+                            }
+                        }
+                    }, true);
+
+                    World.add(engine.world, [o]);
+                    
+                    return o;
+                }
