@@ -1,134 +1,84 @@
-//
-// Supermarket Catastrophy
-//
-Physics({ timestep: 3 }, function (world) {
-    window.world = world
+// Matter.js module aliases
+var Engine = Matter.Engine,
+    World = Matter.World,
+    Bodies = Matter.Bodies,
+    Composites = Matter.Composites,
+    MouseConstraint = Matter.MouseConstraint,
+    Body = Matter.Body,
+    Vector = Matter.Vector
 
-    // bounds of the window
-    var viewWidth = window.innerWidth
-        ,viewHeight = window.innerHeight
-        ,viewportBounds = Physics.aabb(0, 0, window.innerWidth, window.innerHeight)
-        ,edgeBounce
-        ,renderer
-        ;
+// create a Matter.js engine
+var engine = Engine.create(document.body);
 
-    // let's use the pixi renderer
+// create two boxes and a ground
+boxA = Bodies.rectangle(400, 200, 80, 80);
+var boxB = Bodies.rectangle(450, 50, 80, 80);
+var ground = Bodies.rectangle(400, 610, 810, 60, { isStatic: true });
 
-    // create a renderer
-    renderer = Physics.renderer('pixi', {
-        el: 'viewport'
-    });
+// add all of the bodies to the world
+World.add(engine.world, [boxA, boxB, ground]);
+        
+var scale = 0.9;
+World.add(engine.world, Composites.car(150, 100, 100 * scale, 40 * scale, 30 * scale));
 
-    // add the renderer
-    world.add(renderer);
-    // render on each step
-    world.on('step', function () {
-        world.render();
-    });
-    // add the interaction
-    world.add(Physics.behavior('interactive', { el: renderer.container }));
+scale = 0.8;
+World.add(engine.world, Composites.car(350, 300, 100 * scale, 40 * scale, 30 * scale));
 
+World.add(engine.world, [
+    Bodies.rectangle(200, 150, 650, 20, { isStatic: true, angle: Math.PI * 0.06 }),
+    Bodies.rectangle(500, 350, 650, 20, { isStatic: true, angle: -Math.PI * 0.06 }),
+    Bodies.rectangle(340, 580, 700, 20, { isStatic: true, angle: Math.PI * 0.04 })
+]);
 
-    // constrain objects to these bounds
-    edgeBounce = Physics.behavior('edge-collision-detection', {
-        aabb: viewportBounds
-        ,restitution: 0.2
-        ,cof: 0.8
-    });
+var mouseConstraint = MouseConstraint.create(engine);
+// World.add(engine.world, mouseConstraint);
 
-    // resize events
-    window.addEventListener('resize', function () {
-
-        // as of 0.7.0 the renderer will auto resize... so we just take the values from the renderer
-        viewportBounds = Physics.aabb(0, 0, renderer.width, renderer.height);
-        // update the boundaries
-        edgeBounce.setAABB(viewportBounds);
-
-    }, true);
-
-    // create some bodies
-    // projectile
-    window.projectile = Physics.body('circle', {
-        x: 20
-        ,y: 50
-        ,mass: 4
-        ,radius: 20
-        // ,restitution: 0.99
-        ,angularVelocity: 0
-        ,styles: {
-            fillStyle: '0xd33682'
-            ,lineWidth: 1
-            ,angleIndicator: '0x751b4b'
-        }
-    });
-
-    // squares
-    var squares = [];
-    for ( var i = 0, l = 24; i < l; ++i ){
-
-        squares.push( Physics.body('rectangle', {
-            width: 40
-            ,height: 40
-            ,x: 42 * (i / 6 | 0) + viewWidth - 40 * 8
-            ,y: 40 * (i % 6) + viewHeight - 40 * 6 + 15
-            ,vx: 0
-            ,cof: 0.99
-            ,restitution: 0.99
-            ,styles: {
-                src: '/img/cat.png'
-                ,width: 40
-                ,height: 40
-            }
-        }));
+var sword = Bodies.circle(100, 100, 20, {
+  render: {
+    sprite: {
+      texture: '/img/sword.png',
+      xScale: 0.1,
+      yScale: 0.1 
     }
+  }
+})
+World.add(engine.world, [sword])
 
-    world.add( squares );
+function swordContraint (sword) {
+  var moveswordto
+  var sworddirection = 0
+  Matter.Events.on(mouseConstraint, 'mousedown', function (event){
+    moveswordto = Vector.clone(event.mouse.position)
+  })
+  Matter.Events.on(mouseConstraint, 'mousemove', function (event) {
+    sworddirection = Vector.angle(event.mouse.position, sword.position)
+  })
 
-    world.add( projectile );
-
-    // add some fun interaction
-    var attractor = Physics.behavior('attractor', {
-        order: 0,
-        strength: 0.2
-    }).applyTo([projectile]);
-    
-    var swordmove = Physics.behavior('swordmove', {})
-      .applyTo([projectile])
-
-    world.on({
-      'interact:poke': function (pos) {
-        world.wakeUpAll()
-        swordmove.setPosition(pos)
-        world.add(swordmove)
+  Matter.Events.on(engine, 'tick', function movemyball () {
+    if (moveswordto != null) {
+      var dir = Vector.sub(moveswordto, sword.position)
+      var len = Vector.magnitude(dir)
+      if (len < 10) {
+        Body.setVelocity(sword, dir)
+      } else {
+        var vel = Vector.mult(dir, 20 / len)
+        //var mm = Math.pow(Math.max((400 - len)*10 / 400, 1), 1.3)
+        //console.log(mm)
+        //Vector.mult(dir, mm, vel)
+        Body.setVelocity(sword, vel)
       }
-    })
-    /*
-    world.on({
-        'interact:poke': function( pos ){
-            world.wakeUpAll();
-            attractor.position( pos );
-            world.add( attractor );
-        }
-        ,'interact:move': function( pos ){
-            attractor.position( pos );
-        }
-        ,'interact:release': function(){
-            world.wakeUpAll();
-            world.remove( attractor );
-        }
-    });*/
+    }
+    Body.setAngle(sword, sworddirection)
+  })
+}
 
-    // add things to the world
-    world.add([
-        Physics.behavior('constant-acceleration')
-        ,Physics.behavior('body-impulse-response')
-        ,Physics.behavior('body-collision-detection')
-        ,Physics.behavior('sweep-prune')
-        ,edgeBounce
-    ]);
+swordContraint(sword)
 
-    // subscribe to ticker to advance the simulation
-    Physics.util.ticker.on(function( time ) {
-        world.step( time );
-    });
-});
+renderOptions = engine.render.options;
+renderOptions.showAngleIndicator = true;
+renderOptions.showCollisions = true;
+renderOptions.wireframes = false
+
+
+// run the engine
+Engine.run(engine);
