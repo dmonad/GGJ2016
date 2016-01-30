@@ -102,6 +102,7 @@ function attachWithRope (world, opts) { // from, body, bodyPoint, length) {
     body = ropeB.bodies[j]
     e = $.extend({}, emitSettings)
     e.pos = { x: body.position.x, y: body.position.y }
+    sounds.splash.play()
 
     emitter = new cloudkid.Emitter(engine.render.textContainer, [PIXI.Texture.fromImage('img/particle.png')], e)
     emitter._body = body
@@ -171,7 +172,7 @@ function addSword (engine, pos) {
     frictionAir: 0,
     render: {
       sprite: {
-        texture: '/img/sword.png',
+        texture: 'img/sword.png',
         xScale: 0.1,
         yScale: 0.1
       }
@@ -266,7 +267,7 @@ function waitForSword (engine) {
   Matter.Events.on(mouseConstraint, 'mouseup', listener)
 }
 
-var explosion = PIXI.Sprite.fromImage('/img/explode.png')
+var explosion = PIXI.Sprite.fromImage('img/explode.png')
 explosion.scale.x = 0.5
 explosion.scale.y = 0.5
 
@@ -442,4 +443,10 @@ function createOrgan (organ, x, y, scale, level) {
   level.organs.push(o)
 
   return o
+}
+
+var sounds = {
+  splash: new Howl({
+    urls: ['sounds/splash.ogg']
+  })
 }

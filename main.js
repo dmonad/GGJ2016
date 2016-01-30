@@ -105,7 +105,8 @@ function createBox () {
 
 function createLevel () {
   createBox()
-  var level = window.levels[location.hash](engine)
+  var levelname = location.hash.length > 1 ? location.hash : '#1'
+  var level = window.levels[levelname](engine)
 
   Events.on(engine, 'tick', function (event) {
     for (var i = 0; i < level.targetZones.length; i++) {
@@ -166,3 +167,7 @@ function clearGame () {
   }
   Matter.World.clear(engine.world, false, true)
 }
+
+$(window).on('hashchange', function() {
+  location.reload()
+});
