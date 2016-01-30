@@ -1,0 +1,30 @@
+{
+  "name": "pixi.js",
+  "main": "bin/pixi.js",
+  "ignore": [
+    "**/.*",
+    "docs",
+    "gulp",
+    "node_modules",
+    "bower_components",
+    "test",
+    "bower.json",
+    "gulpfile.js",
+    "inch.json",
+    "testem.json"
+  ],
+  "dependencies": {},
+  "devDependencies": {},
+  "homepage": "https://github.com/pixijs/pixi.js",
+  "version": "3.0.9",
+  "_release": "3.0.9",
+  "_resolution": {
+    "type": "version",
+    "tag": "v3.0.9",
+    "commit": "962f5bdff1ed2d96cfeaef22897ed83b7cce79bd"
+  },
+  "_source": "git://github.com/pixijs/pixi.js.git",
+  "_target": "~3.0.9",
+  "_originalSource": "pixijs/pixi.js",
+  "_direct": true
+}
