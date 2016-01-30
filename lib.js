@@ -475,6 +475,6 @@ function createOrgan (organ, x, y, scale, level) {
 
 var sounds = {
   splash: new Howl({
-    urls: ['sounds/splash.wav']
+    urls: ['sounds/splash.ogg']
   })
 }
