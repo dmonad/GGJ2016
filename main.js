@@ -20,19 +20,15 @@ var boneHeadWidth = 209;
 var boneHeadHeight = 146;
 var boneGroup = Body.nextGroup(true);
 
-function createBone(x1, y1, x2, y2, w, cb) {
-    $.get('./img/bone_end_collision.svg').done(function(data) {
+function createBone(x1, y1, x2, y2, w) {
         var h = Math.sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2))
         var cx = (x1 + x2) / 2;
         var cy = (y1 + y2) / 2;
         var w2 = w * boneHeadWidth / boneWidth;
         var shaftScale = w / boneWidth;
-                    var path = $(data).find('path')[0];
-                    var points = Svg.pathToVertices(path, 10);
-                    var bds = Bounds.create(points);
-                    var pathWidth = bds.max.x - bds.min.x;
+                    var pathWidth = boneEndBounds.max.x - boneEndBounds.min.x;
         var headScale = w2 / pathWidth*0.95;
-                    var vertices = Vertices.scale(points, headScale, headScale);
+                    var vertices = Vertices.scale(boneEndPath, headScale, headScale);
                     
                     var end1 = Bodies.fromVertices(cx, cy - h/2, [vertices], {
                         render: {
@@ -62,8 +58,6 @@ function createBone(x1, y1, x2, y2, w, cb) {
                         isStatic: true
                     }, true);
                     
-                    console.log(cx, cy, w, h);
-                    
                     var shaft = Bodies.rectangle(cx, cy, w, h, { 
                         render: {
                             sprite: {
@@ -78,25 +72,13 @@ function createBone(x1, y1, x2, y2, w, cb) {
                     
                     var angle = -Math.atan((x1-x2)/(y1-y2));
                     
-                    console.log(angle/(2*Math.PI)*360);
-                    
                     var bone = Composite.create({bodies: [shaft, end1, end2] });
                     Composite.rotate(bone, angle, {x: cx, y: cy});
                     
                     World.add(engine.world, bone);
                     
-                    if (typeof cb === 'function') {
-                        cb(bone);
-                    }
-                });
+                    return bone;
 }
-
-createBone(30, 30, 780, 30, 40);
-createBone(30, 85, 30, 515, 40);
-createBone(50, 570, 750, 570, 40);
-createBone(770, 85, 770, 515, 40);
-
-var circle = Bodies.circle(500, 100, 5, { isStatic: true });
 
 function randomProperty (obj) {
     var keys = Object.keys(obj)
@@ -136,18 +118,13 @@ var imgHeight = organs[organ].height;
 var targetWidth = imgWidth * organs[organ].scale;
 var targetHeight = imgHeight * organs[organ].scale;
 
-$.get('./img/'+organ+'.svg').done(function(data) {
-                    var path = $(data).find('path')[0];
-                    var points = Svg.pathToVertices(path, 10);
-                    var center = Vertices.centre(points);
-                    var bds = Bounds.create(points);
-                    var cx = (bds.min.x + bds.max.x) / 2;
-                    var cy = (bds.min.y + bds.max.y) / 2;
+function createOrgan(organ, x, y) {
+                    var bds = organs[organ]._bounds;
                     var pathWidth = bds.max.x - bds.min.x;
                     var pathHeight = bds.max.y - bds.min.y;
-                    var vertices = Vertices.scale(points, targetWidth / pathWidth*0.95, targetHeight / pathHeight*0.95);
+                    var vertices = Vertices.scale(organs[organ]._path, targetWidth / pathWidth*0.95, targetHeight / pathHeight*0.95);
                     
-                    var liver = Bodies.fromVertices(350, 200, [vertices], {
+                    var o = Bodies.fromVertices(x, y, [vertices], {
                         render: {
                             fillStyle: 'none',
                             strokeStyle: '#FF0000',
@@ -158,42 +135,73 @@ $.get('./img/'+organ+'.svg').done(function(data) {
                             }
                         }
                     }, true);
-                
-                    var liverConstraint = Constraint.create({ 
-                                bodyB: liver,
-                                pointB: { x: 0, y: 0 },
-                                bodyA: circle,
-                                pointA: { x: 0, y: 0 },
-                                stiffness: 0.2,
-                                length: 400,
-                                render: {
-                                    lineWidth: 10,
-                                    strokeStyle: '#880000'
-                                }
-                            });
 
-                    World.add(engine.world, [liver, liverConstraint]);
-                });
+                    World.add(engine.world, [o]);
+                    
+                    return o;
+                }
                 
 var mouseConstraint = MouseConstraint.create(engine);
-
-/*
-var mouseConstraint = MouseConstraint.create(engine, {
-    collisionFilter: {
-                category: 0x0001,
-                mask: 0x00000000,
-                group: 0
-            }});
+            
+            var queue = new createjs.LoadQueue(true);
+            
+            function loadFiles() {
+                for (organ in organs)
+                {
+                    queue.loadFile('img/'+organ+'.svg', false); 
+                    // queue.loadFile('img/'+organ+'.png', false);               
+                }
+                
+                queue.loadFile('img/bone_end_collision.svg', false); 
+                // queue.loadFile('img/bone_end.png', false);  
+                // queue.loadFile('img/bone.png', false);  
+                
+                 queue.on("complete", function() {
+                     engine.render.textContainer.removeChild(loadingText);
+                     buildPaths();
+                     createLevel();
+                 });
+                 
+                 queue.load();
+            }
+            
+            var boneEndPath, boneEndBounds;
+            
+            function buildPath(file) {
+                var data = queue.getResult(file);
+                var path = $(data).find('path')[0];
+                return Svg.pathToVertices(path, 10);                
+            }
+            
+            function buildPaths() {
+                boneEndPath = buildPath('img/bone_end_collision.svg');
+                boneEndBounds = Bounds.create(boneEndPath);
+                
+                for (organ in organs)
+                {
+                    var p = organs[organ]._path = buildPath('img/'+organ+'.svg', false);  
+                    organs[organ]._bounds = Bounds.create(p);           
+                }              
+            }
+            
+            function createLevel() {
+                var circle = Bodies.circle(500, 100, 5, { isStatic: true });
+                
+                createBone(30, 30, 780, 30, 40);
+                createBone(30, 85, 30, 515, 40);
+                createBone(50, 570, 750, 570, 40);
+                createBone(770, 85, 770, 515, 40);
+                
+                createOrgan('lungs', 400, 400);
+                
+                World.add(engine.world, [mouseConstraint, circle]);
+            }
+            
+            loadFiles();
             
             
-            Events.on(mouseConstraint, 'mousedown', function(event) {
-                console.log(event.mouse.position)
-                Body.setPosition(circle, { x: event.mouse.position.x, y: event.mouse.position.y });
-            })
-            */
-
-// add all of the bodies to the world
-World.add(engine.world, [mouseConstraint, circle]);
+var loadingText = new PIXI.Text('Loading...',{font : '24px Arial', fill : 0xff1010, align : 'center'});
+engine.render.textContainer.addChild(loadingText);
 
         var renderOptions = engine.render.options;
         renderOptions.showAngleIndicator = false;

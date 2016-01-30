@@ -55,8 +55,13 @@ var Composite = Matter.Composite,
             backgroundColor: options.background
         });
         
+        render.outerContainer = new PIXI.Container();
+        
         render.canvas = render.context.view;
         render.container = new PIXI.Container();
+        render.outerContainer.addChild(render.container);
+        render.textContainer = new PIXI.Container();
+        render.outerContainer.addChild(render.textContainer);
         render.bounds = render.bounds || { 
             min: { 
                 x: 0,
@@ -245,7 +250,7 @@ var Composite = Matter.Composite,
         for (i = 0; i < constraints.length; i++)
             RenderPixi2.constraint(engine, constraints[i]);
 
-        context.render(container);
+        context.render(render.outerContainer);
     };
 
 
