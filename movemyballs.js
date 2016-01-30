@@ -49,12 +49,11 @@ Physics({ timestep: 3 }, function (world) {
     // create some bodies
     // projectile
     window.projectile = Physics.body('circle', {
-        x: -20
-        ,y: viewHeight - 150
-        ,vx: 2
+        x: 20
+        ,y: 50
         ,mass: 4
         ,radius: 20
-        ,restitution: 0.99
+        // ,restitution: 0.99
         ,angularVelocity: 0
         ,styles: {
             fillStyle: '0xd33682'
@@ -85,18 +84,25 @@ Physics({ timestep: 3 }, function (world) {
 
     world.add( squares );
 
-    setTimeout(function(){
-
-        world.add( projectile );
-
-    }, 2000);
+    world.add( projectile );
 
     // add some fun interaction
     var attractor = Physics.behavior('attractor', {
         order: 0,
         strength: 0.2
     }).applyTo([projectile]);
+    
+    var swordmove = Physics.behavior('swordmove', {})
+      .applyTo([projectile])
 
+    world.on({
+      'interact:poke': function (pos) {
+        world.wakeUpAll()
+        swordmove.setPosition(pos)
+        world.add(swordmove)
+      }
+    })
+    /*
     world.on({
         'interact:poke': function( pos ){
             world.wakeUpAll();
@@ -110,7 +116,7 @@ Physics({ timestep: 3 }, function (world) {
             world.wakeUpAll();
             world.remove( attractor );
         }
-    });
+    });*/
 
     // add things to the world
     world.add([
