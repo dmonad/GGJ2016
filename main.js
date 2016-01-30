@@ -45,6 +45,7 @@ function loadFiles () {
   queue.loadFile('img/bone.png', false)
   queue.loadFile('img/foreground.png', false)
   queue.loadFile('img/background.png', false)
+  queue.loadFile('img/yinyang.png', false)
 
   queue.on('complete', function () {
     engine.render.textContainer.removeChild(loadingText)
@@ -132,6 +133,9 @@ function createLevel () {
 
     engine.render.backgroundContainer.addChild(graphics)
   }
+
+  startParticles(engine)
+  refreshScore()
 }
 
 var scoreText
@@ -151,11 +155,6 @@ renderOptions.showAngleIndicator = false
 renderOptions.wireframes = false
 renderOptions.showConvexHull = true
 engine.enableSleeping = true
-
-var mouseConstraint = MouseConstraint.create(engine)
-Matter.Events.on(mouseConstraint, 'mousemove', function (event) {
-  console.log(JSON.stringify(event.mouse.position))
-})
 
 // run the engine
 Engine.run(engine)
