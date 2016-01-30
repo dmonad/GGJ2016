@@ -171,9 +171,3 @@ function clearGame () {
 $(window).on('hashchange', function() {
   location.reload()
 });
-
-var sounds = {
-  splash: new Howl({
-    urls: ['/sounds/splash.wav']
-  })
-}
