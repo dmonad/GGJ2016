@@ -189,7 +189,7 @@ function addSword (engine, pos) {
     frictionAir: 0,
     render: {
       sprite: {
-        texture: '/img/sword.png',
+        texture: 'img/sword.png',
         xScale: 0.1,
         yScale: 0.1
       }
@@ -284,7 +284,7 @@ function waitForSword (engine) {
   Matter.Events.on(mouseConstraint, 'mouseup', listener)
 }
 
-var explosion = PIXI.Sprite.fromImage('/img/explode.png')
+var explosion = PIXI.Sprite.fromImage('img/explode.png')
 explosion.scale.x = 0.5
 explosion.scale.y = 0.5
 
@@ -301,7 +301,7 @@ function activateExplodeChakra (engine, pos) {
     isStatic: true,
     render: {
       sprite: {
-        texture: '/img/explode.png',
+        texture: 'img/explode.png',
         xScale: 0.1,
         yScale: 0.1
       }
@@ -475,6 +475,6 @@ function createOrgan (organ, x, y, scale, level) {
 
 var sounds = {
   splash: new Howl({
-    urls: ['/sounds/splash.wav']
+    urls: ['sounds/splash.wav']
   })
 }
