@@ -111,6 +111,7 @@ function addSword (engine, pos) {
 
     Matter.Events.on(engine, 'tick', function movemyball () {
       if (moveswordto != null) {
+        Matter.Sleeping.set(sword, false)
         var dir = Vector.sub(moveswordto, sword.position)
         var len = Vector.magnitude(dir)
         if (len < 10) {
