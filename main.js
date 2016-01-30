@@ -147,5 +147,8 @@ renderOptions.wireframes = false
 renderOptions.showConvexHull = true
 engine.enableSleeping = true
 
+
+waitForSword(engine)
+
 // run the engine
 Engine.run(engine)
