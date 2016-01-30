@@ -91,12 +91,12 @@ function createBone(x1, y1, x2, y2, w, cb) {
                 });
 }
 
-createBone(200, 200, 300, 300, 50);
-createBone(100, 100, 300, 500, 20);
+createBone(30, 30, 780, 30, 40);
+createBone(30, 85, 30, 515, 40);
+createBone(50, 570, 750, 570, 40);
+createBone(770, 85, 770, 515, 40);
 
-
-var ground = Bodies.rectangle(400, 610, 810, 60, { isStatic: true });
-var circle = Bodies.circle(700, 100, 5, { isStatic: true });
+var circle = Bodies.circle(500, 100, 5, { isStatic: true });
 
 function randomProperty (obj) {
     var keys = Object.keys(obj)
@@ -147,7 +147,7 @@ $.get('./img/'+organ+'.svg').done(function(data) {
                     var pathHeight = bds.max.y - bds.min.y;
                     var vertices = Vertices.scale(points, targetWidth / pathWidth*0.95, targetHeight / pathHeight*0.95);
                     
-                    var liver = Bodies.fromVertices(350, 10, [vertices], {
+                    var liver = Bodies.fromVertices(350, 200, [vertices], {
                         render: {
                             fillStyle: 'none',
                             strokeStyle: '#FF0000',
@@ -164,8 +164,8 @@ $.get('./img/'+organ+'.svg').done(function(data) {
                                 pointB: { x: 0, y: 0 },
                                 bodyA: circle,
                                 pointA: { x: 0, y: 0 },
-                                stiffness: 0.8,
-                                length: 100,
+                                stiffness: 0.2,
+                                length: 400,
                                 render: {
                                     lineWidth: 10,
                                     strokeStyle: '#880000'
@@ -193,7 +193,7 @@ var mouseConstraint = MouseConstraint.create(engine, {
             */
 
 // add all of the bodies to the world
-World.add(engine.world, [ground, mouseConstraint, circle]);
+World.add(engine.world, [mouseConstraint, circle]);
 
         var renderOptions = engine.render.options;
         renderOptions.showAngleIndicator = false;
