@@ -12,8 +12,22 @@ var Engine = Matter.Engine,
   Events = Matter.Events,
   Body = Matter.Body
 
+var canvasHeight = 800
+var canvasWidth = 1000
+var margin = 20
+var marginTop = 40
+
 // create a Matter.js engine
-var engine = Engine.create(document.body, { render: RenderPixi2.create({element: document.body, options: {debug: false}}) })
+var engine = Engine.create(document.body, {
+  render: RenderPixi2.create({
+    element: document.body,
+    options: {
+      debug: false,
+      width: canvasWidth,
+      height: canvasHeight
+    }
+  })
+})
 
 var queue = new createjs.LoadQueue(true)
 
@@ -29,9 +43,15 @@ function loadFiles () {
   queue.loadFile('img/bone_end_collision.svg', false)
   queue.loadFile('img/bone_end.png', false)
   queue.loadFile('img/bone.png', false)
+  queue.loadFile('img/foreground.png', false)
+  queue.loadFile('img/background.png', false)
 
   queue.on('complete', function () {
     engine.render.textContainer.removeChild(loadingText)
+    var foreground = new PIXI.Sprite.fromImage('img/foreground.png')
+    engine.render.textContainer.addChild(foreground)
+    var background = new PIXI.Sprite.fromImage('img/background.png')
+    engine.render.backgroundContainer.addChild(background)
     buildPaths()
     createLevel()
   })
@@ -85,11 +105,36 @@ var level = {
   score: 0
 }
 
+function createBox () {
+  var boxTop = Bodies.rectangle(canvasWidth / 2, margin / 2, canvasWidth, margin, {
+    render: { visible: false },
+    isStatic: true
+  })
+  var boxLeft = Bodies.rectangle(margin / 2, canvasHeight / 2, margin, canvasHeight, {
+    render: { visible: false },
+    isStatic: true
+  })
+  var boxRight = Bodies.rectangle(canvasWidth - margin / 2, canvasHeight / 2, margin, canvasHeight, {
+    render: { visible: false },
+    isStatic: true
+  })
+  var boxBottom = Bodies.rectangle(canvasWidth / 2, canvasHeight - margin / 2, canvasWidth * 2, margin, {
+    render: { visible: false },
+    isStatic: true
+  })
+
+  World.add(engine.world, [boxTop, boxLeft, boxRight, boxBottom])
+}
+
 function createLevel () {
-  createBone(30, 30, 780, 30, 20)
-  createBone(30, 85, 30, 515, 20)
-  createBone(50, 570, 750, 570, 20)
-  createBone(770, 85, 770, 515, 20)
+  createBox()
+
+  /*
+  createBone(30, 30, 780, 30, 40)
+  createBone(30, 85, 30, 515, 40)
+  createBone(50, 570, 750, 570, 40)
+  createBone(770, 85, 770, 515, 40)
+  */
 
   var lung = createOrgan('lungs', 300, 300, 0.1)
 
@@ -136,7 +181,7 @@ function createLevel () {
     }
   })
 
-  World.add(engine.world, [MouseConstraint.create(engine)])
+  // World.add(engine.world, [MouseConstraint.create(engine)])
 
   for (var i = 0; i < level.targetZones.length; i++) {
     var zone = level.targetZones[i]
@@ -147,7 +192,7 @@ function createLevel () {
 
     engine.render.textContainer.addChild(graphics)
   }
-  
+
   refreshScore()
 }
 
@@ -169,7 +214,6 @@ renderOptions.wireframes = false
 renderOptions.showConvexHull = true
 engine.enableSleeping = true
 
-// DEBUG
 var mouseConstraint = MouseConstraint.create(engine)
 Matter.Events.on(mouseConstraint, 'mousemove', function (event) {
   console.log(JSON.stringify(event.mouse.position))

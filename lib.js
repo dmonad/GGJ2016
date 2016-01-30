@@ -22,7 +22,6 @@ var chainStyle = {
 // chakras!!
 var explodeChakraIsActivated = false
 
-
 /*
   opts = {
     fromPoint: {x:0,y:0},
@@ -98,10 +97,22 @@ function addSword (engine, pos) {
   sword.label = 'sword'
   World.add(engine.world, [sword])
 
+  var bloodLayer = new PIXI.Graphics()
+  engine.render.backgroundContainer.addChild(bloodLayer)
+
   function swordContraint (sword) {
     var moveswordto = pos
+    var oldpos = pos
     var sworddirection = 0
     var mouseConstraint = MouseConstraint.create(engine)
+
+    function drawCircle (x, y) {
+      bloodLayer.lineStyle(0)
+      bloodLayer.beginFill(0x880000, 1)
+      bloodLayer.drawCircle(x, y, 5)
+      bloodLayer.endFill()
+    }
+
     Matter.Events.on(mouseConstraint, 'mousedown', function (event) {
       moveswordto = Vector.clone(event.mouse.position)
     })
@@ -110,6 +121,15 @@ function addSword (engine, pos) {
     })
 
     Matter.Events.on(engine, 'tick', function movemyball () {
+      if (oldpos.x !== sword.position.x && oldpos.y !== sword.position.y) {
+        bloodLayer.beginFill(0, 0)
+        bloodLayer.lineStyle(10, 0x880000)
+        bloodLayer.moveTo(oldpos.x, oldpos.y)
+        bloodLayer.lineTo(sword.position.x, sword.position.y)
+        bloodLayer.endFill()
+        drawCircle(sword.position.x, sword.position.y)
+        oldpos = Vector.clone(sword.position)
+      }
       if (moveswordto != null) {
         Matter.Sleeping.set(sword, false)
         var dir = Vector.sub(moveswordto, sword.position)
@@ -188,8 +208,8 @@ function activateExplodeChakra (engine, pos) {
   })
   engine.world.bodies.forEach(function (body) {
     if (!['sword'].some(function (s) {
-      return body.label === s
-    })) {
+        return body.label === s
+      })) {
       var force = Vector.sub(body.position, pos)
       var dist = Vector.magnitude(force)
       if (dist < 600) {
@@ -225,9 +245,9 @@ function putExplodeChakra (engine, pos) {
   World.add(engine.world, [chakra])
 }
 
-var boneWidth = 116;
-var boneHeadWidth = 209;
-var boneHeadHeight = 146;
+var boneWidth = 116
+var boneHeadWidth = 209
+var boneHeadHeight = 146
 var boneGroup = Body.nextGroup(true)
 
 var _boneHeadCache = {}

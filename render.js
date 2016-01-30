@@ -1,3 +1,4 @@
+/*eslint-disable */
 /**
 * See the included usage [examples](https://github.com/liabru/matter-js/tree/master/examples).
 *
@@ -58,6 +59,8 @@ var Composite = Matter.Composite,
         render.outerContainer = new PIXI.Container();
         
         render.canvas = render.context.view;
+        render.backgroundContainer = new PIXI.Container();
+        render.outerContainer.addChild(render.backgroundContainer);
         render.container = new PIXI.Container();
         render.outerContainer.addChild(render.container);
         render.textContainer = new PIXI.Container();
