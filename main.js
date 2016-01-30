@@ -168,3 +168,7 @@ function clearGame () {
   }
   Matter.World.clear(engine.world, false, true)
 }
+
+$(window).on('hashchange', function() {
+  location.reload()
+});
