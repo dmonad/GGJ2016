@@ -23,7 +23,7 @@ var chainStyle = {
 var explodeChakraIsActivated = false
 
 
-/* 
+/*
   opts = {
     fromPoint: {x:0,y:0},
     to: body,
@@ -56,7 +56,7 @@ function attachWithRope (world, opts) { // from, body, bodyPoint, length) {
   })
 
   Matter.Composites.chain(ropeB, 0, 0, 0, 0, {
-    stiffness: 0.7,
+    stiffness: 1,
     length: 40,
     render: chainStyle
   })
@@ -64,14 +64,14 @@ function attachWithRope (world, opts) { // from, body, bodyPoint, length) {
   Matter.Composite.add(ropeB, Matter.Constraint.create({
     bodyB: ropeB.bodies[0],
     pointA: opts.fromPoint,
-    stiffness: 0.7,
+    stiffness: 1,
     render: chainStyle
   }))
   Matter.Composite.add(ropeB, Matter.Constraint.create({
     bodyA: ropeB.bodies[ropeB.bodies.length - 1],
     bodyB: body,
     pointB: bodyPoint,
-    stiffness: 0.7,
+    stiffness: 1,
     length: 10,
     render: chainStyle
   }))

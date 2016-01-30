@@ -79,5 +79,8 @@ engine.render.textContainer.addChild(loadingText);
         renderOptions.wireframes = false;
         renderOptions.showConvexHull = true;
 
+
+waitForSword(engine)
+
 // run the engine
 Engine.run(engine);
