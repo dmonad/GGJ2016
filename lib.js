@@ -19,6 +19,10 @@ var chainStyle = {
   strokeStyle: '#F00'
 }
 
+// chakras!!
+var explodeChakraIsActivated = false
+
+
 /* 
   opts = {
     fromPoint: {x:0,y:0},
@@ -110,7 +114,15 @@ function addSword (engine, pos) {
         var dir = Vector.sub(moveswordto, sword.position)
         var len = Vector.magnitude(dir)
         if (len < 10) {
+          // don't intesify velocity.
+          // very near to the destination position
           Body.setVelocity(sword, dir)
+
+          // check Chakras
+          if (explodeChakraIsActivated) {
+            explodeChakraIsActivated = false
+            activateExplodeChakra(engine, sword.position)
+          }
         } else {
           var vel = Vector.mult(dir, 20 / len)
           // var mm = Math.pow(Math.max((400 - len)*10 / 400, 1), 1.3)
@@ -128,9 +140,14 @@ function addSword (engine, pos) {
   // Collision detection Sword <-> rope
   Matter.Events.on(engine, 'collisionStart', function (event) {
     var pair = event.pairs[0]
-    if (pair.bodyA.label === 'rope' || pair.bodyB.label === 'rope') {
-      if (pair.bodyA.label === 'sword' || pair.bodyB.label === 'sword') {
+    if (pair.bodyA.label === 'sword' || pair.bodyB.label === 'sword') {
+      if (pair.bodyA.label === 'rope' || pair.bodyB.label === 'rope') {
         (pair.bodyA.label === 'rope' ? pair.bodyA : pair.bodyB).removeRope()
+      }
+      if (pair.bodyA.label === 'explodechakra' || pair.bodyB.label === 'explodechakra') {
+        window.setTimeout(function () {
+          (pair.bodyA.label === 'explodechakra' ? pair.bodyA : pair.bodyB).activate()
+        }, 0)
       }
     }
   })
@@ -145,9 +162,67 @@ function waitForSword (engine) {
   Matter.Events.on(mouseConstraint, 'mouseup', listener)
 }
 
-var boneWidth = 116
-var boneHeadWidth = 209
-var boneHeadHeight = 146
+var explosion = PIXI.Sprite.fromImage('/img/explode.png')
+explosion.scale.x = 0.5
+explosion.scale.y = 0.5
+
+function activateExplodeChakra (engine, pos) {
+  explosion.position = {
+    x: pos.x - explosion.width / 2,
+    y: pos.y - explosion.height / 2
+  }
+  engine.render.container.addChild(explosion)
+  setTimeout(function () {
+    engine.render.container.removeChild(explosion)
+  }, 400)
+  Bodies.circle(pos.x, pos.y, 5, {
+    isStatic: true,
+    render: {
+      sprite: {
+        texture: '/img/explode.png',
+        xScale: 0.1,
+        yScale: 0.1
+      }
+    }
+  })
+  engine.world.bodies.forEach(function (body) {
+    if (!['sword'].some(function (s) {
+      return body.label === s
+    })) {
+      var force = Vector.sub(body.position, pos)
+      var dist = Vector.magnitude(force)
+      if (dist < 400) {
+        force = Vector.mult(force, 0.1 * Math.sqrt((400 - dist) / 400))
+        Body.applyForce(body, pos, force)
+      }
+    }
+  })
+}
+
+function putExplodeChakra (engine, pos) {
+  var chakra = Bodies.circle(pos.x, pos.y, 20, {
+    restitution: 0,
+    frictionAir: 0,
+    isStatic: true,
+    render: {
+      sprite: {
+        texture: '/img/cat.png',
+        xScale: 0.1,
+        yScale: 0.1
+      }
+    }
+  })
+  chakra.label = 'explodechakra'
+  chakra.activate = function () {
+    Matter.Composite.removeBody(engine.world, this)
+    explodeChakraIsActivated = true
+  }
+  World.add(engine.world, [chakra])
+}
+
+var boneWidth = 116;
+var boneHeadWidth = 209;
+var boneHeadHeight = 146;
 var boneGroup = Body.nextGroup(true)
 
 var _boneHeadCache = {}
