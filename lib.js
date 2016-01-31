@@ -141,6 +141,7 @@ function addSword (engine, pos, level) {
         level.attempts++
         refreshScore(level)
         moveswordto = Vector.clone(event.mouse.position)
+        playSoundeffect('pain')
       }
     })
     Matter.Events.on(mouseConstraint, 'mousemove', function (event) {
@@ -530,10 +531,8 @@ var sounds = {
     new Howl({urls: ['sounds/explosion2.ogg']})
   ],
   pain: [
-    new Howl({urls: ['sounds/pain1.ogg'], volume: 0.5}),
-    new Howl({urls: ['sounds/pain2.ogg'], volume: 0.5}),
-    new Howl({urls: ['sounds/pain3.ogg'], volume: 0.5}),
-    new Howl({urls: ['sounds/pain4.ogg'], volume: 0.5})
+    new Howl({urls: ['sounds/pain2.ogg'], volume: 0.05}),
+    new Howl({urls: ['sounds/pain3.ogg'], volume: 0.05})
   ],
   hit: [
     new Howl({urls: ['sounds/hit1.ogg'], volume: 0.5}),
@@ -547,10 +546,12 @@ var sounds = {
   ]
 }
 
+var _soundRot = {}
 function playSoundeffect (name) {
+  if (_soundRot[name] === undefined) _soundRot[name] = 0
   var effects = sounds[name]
   if (effects.length > 0) {
-    var choose = Math.floor(Math.random() * effects.length)
-    effects[choose].play()
+    // var choose = Math.floor(Math.random() * effects.length)
+    effects[(_soundRot[name]++) % effects.length].play()
   }
 }
