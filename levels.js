@@ -1,4 +1,3 @@
-
 window.levels = {
   '#1': function level1 (engine) {
     var level = {
@@ -26,21 +25,22 @@ window.levels = {
       }],
       score: 0
     }
+
     var lung = createOrgan('lungs', 300, 300, 0.1, level)
 
     var heart = createOrgan('heart', 600, 350, 0.2, level)
 
     attachWithRope(engine.world, {
-      fromPoint: {x:200,y:100},
+      fromPoint: {x: 200,y: 100},
       to: lung
     })
     attachWithRope(engine.world, {
-      fromPoint: {x:400, y:100},
+      fromPoint: {x: 400, y: 100},
       to: lung
     })
 
     attachWithRope(engine.world, {
-      fromPoint: {x:600, y:170},
+      fromPoint: {x: 600, y: 170},
       to: heart
     })
 
@@ -86,16 +86,16 @@ window.levels = {
     var heart = createOrgan('heart', 200, 350, 0.2, level)
 
     attachWithRope(engine.world, {
-      fromPoint: {x:200,y:100},
+      fromPoint: {x: 200,y: 100},
       to: lung
     })
     attachWithRope(engine.world, {
-      fromPoint: {x:400, y:100},
+      fromPoint: {x: 400, y: 100},
       to: lung
     })
 
     attachWithRope(engine.world, {
-      fromPoint: {x:600, y:170},
+      fromPoint: {x: 600, y: 170},
       to: heart
     })
 

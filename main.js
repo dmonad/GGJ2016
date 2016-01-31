@@ -115,23 +115,42 @@ function createLevel () {
       for (var j = 0; j < result.length; j++) {
         var center = Vertices.centre(result[j].vertices)
         if (Bounds.contains(zone, center)) {
-          World.remove(engine.world, result[j])
-          level.organs.splice(level.organs.indexOf(result[j]), 1)
+          var organ = result[j]
+          var sprite = engine.render.sprites['b-' + organ.id]
+          level.organs.splice(level.organs.indexOf(organ), 1)
+          var interval = setInterval(function () {
+            sprite.alpha -= 0.1
+            if (sprite.alpha <= 0) {
+              window.clearInterval(interval)
+              World.remove(engine.world, organ)
+            }
+          }, 40)
           level.score++
           refreshScore(level)
-          break
         }
       }
     }
   })
+
   for (var i = 0; i < level.targetZones.length; i++) {
     var zone = level.targetZones[i]
-    var graphics = new PIXI.Graphics()
 
-    graphics.beginFill(0x0088FF, 0.2)
-    graphics.drawRect(zone.min.x, zone.min.y, zone.max.x - zone.min.x, zone.max.y - zone.min.y)
+    var w = zone.max.x - zone.min.x
+    var h = zone.max.y - zone.min.y
 
-    engine.render.backgroundContainer.addChild(graphics)
+    var cut = new PIXI.Sprite.fromImage('img/cut.png')
+    cut.x = zone.min.x - w / 3
+    cut.y = zone.min.y - h / 2
+    cut.width = w * 1.6
+    engine.render.backgroundContainer.addChild(cut)
+
+    /*
+      var graphics = new PIXI.Graphics()
+      graphics.beginFill(0x0088FF, 0.2)
+      graphics.drawRect(zone.min.x, zone.min.y, zone.max.x - zone.min.x, zone.max.y - zone.min.y)
+
+      engine.render.backgroundContainer.addChild(graphics)
+     */
   }
 
   startParticles(engine)
@@ -170,8 +189,8 @@ engine.enableSleeping = true
 Engine.run(engine)
 
 function clearGame () {
-  while (engine.render.backgroundContainer.children[1]) { 
-    engine.render.backgroundContainer.removeChild(engine.render.backgroundContainer.children[1]); 
+  while (engine.render.backgroundContainer.children[1]) {
+    engine.render.backgroundContainer.removeChild(engine.render.backgroundContainer.children[1])
   }
   Matter.World.clear(engine.world, false, true)
 }
@@ -181,4 +200,4 @@ $(window).on('hashchange', function() {
     location.hash = '#' + location.hash.slice(6)
   }
   location.reload()
-});
+})

@@ -41,7 +41,6 @@ function attachWithRope (world, opts) { // from, body, bodyPoint, length) {
       var i = ropeB.bodies.indexOf(self)
       Matter.Composite.removeConstraintAt(ropeB, i)
     }, 0)
-    console.log(self)
     var emitSettings = {
       'alpha': {
         'start': 0.77,
@@ -293,7 +292,6 @@ function activateExplodeChakra (engine, pos) {
       if (dist < 600) {
         // var power = 0.01 * Math.min(Math.sqrt((600 - dist) / 600), 0.1)
         var power = 0.03 * Math.pow((600 - dist) / 600, 4)
-        console.log(power)
         force = Vector.mult(force, power)
         Body.applyForce(body, pos, force)
       }
@@ -440,7 +438,8 @@ function createOrgan (organ, x, y, scale, level) {
         texture: organ.image,
         xScale: scale,
         yScale: scale
-      }
+      },
+      emotion: Math.random() > 0.5 ? 'smile' : 'frown'
     }
   }, true)
 
