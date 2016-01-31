@@ -117,6 +117,7 @@ function addSword (engine, pos, level) {
   })
   sword._onStop = []
   sword.label = 'sword'
+  sword.explodeIntensity = 0
   World.add(engine.world, [sword])
 
   var bloodLayer = new PIXI.Graphics()
@@ -187,9 +188,9 @@ function addSword (engine, pos, level) {
   Matter.Events.on(engine, 'collisionStart', function (event) {
     var pair = event.pairs[0]
     var other
-    if (pair.bodyA.label === 'sword') {
+    if (pair.bodyA.label === 'sword' || pair.bodyA.label === 'bone') {
       other = pair.bodyB
-    } else if (pair.bodyB.label === 'sword') {
+    } else if (pair.bodyB.label === 'sword' || pair.bodyA.label === 'bone') {
       other = pair.bodyA
     }
     if (other) {
@@ -228,12 +229,13 @@ function activateExplodeChakra (engine, sword) {
       var dist = Vector.magnitude(force)
       if (dist < 600) {
         // var power = 0.01 * Math.min(Math.sqrt((600 - dist) / 600), 0.1)
-        var power = 0.03 * Math.pow((600 - dist) / 600, 4)
+        var power = sword.explodeIntensity * 0.03 * Math.pow((600 - dist) / 600, 4)
         force = Vector.mult(force, power)
         Body.applyForce(body, pos, force)
       }
     }
   })
+  sword.explodeIntensity = 1
 }
 
 function putChakra (engine, pos, name, activate) {
@@ -261,8 +263,9 @@ function putChakra (engine, pos, name, activate) {
   return chakra
 }
 
-function putFireChakra (engine, pos) {
+function putFireChakra (engine, pos, intensity) {
   return putChakra(engine, pos, 'fire', function (pos, sword) {
+    sword.explodeIntensity += intensity || 1
     sword._onStop.push(activateExplodeChakra)
     sword.render.sprite.tint = 0xFF0000
   })
@@ -337,6 +340,9 @@ function createBone (x1, y1, x2, y2, w) {
   var angle = -Math.atan((x1 - x2) / (y1 - y2))
 
   var bone = Composite.create({bodies: [shaft, end1, end2] })
+  bone.label = 'bone'
+  end1.label = 'bone'
+  end2.label = 'bone'
   Composite.rotate(bone, angle, {x: cx, y: cy})
 
   World.add(engine.world, bone)
