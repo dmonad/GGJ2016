@@ -102,6 +102,7 @@ function createBox () {
   World.add(engine.world, [boxTop, boxLeft, boxRight, boxBottom])
 }
 
+var level
 function createLevel () {
   createBox()
   var levelname = location.hash.length > 1 ? location.hash : '#1'
@@ -116,6 +117,7 @@ function createLevel () {
         var center = Vertices.centre(result[j].vertices)
         if (Bounds.contains(zone, center)) {
           var organ = result[j]
+          score += organ.scoreValue
           var sprite = engine.render.sprites['b-' + organ.id]
           level.organs.splice(level.organs.indexOf(organ), 1)
           var interval = setInterval(function () {
@@ -125,7 +127,6 @@ function createLevel () {
               World.remove(engine.world, organ)
             }
           }, 40)
-          level.score++
           refreshScore(level)
         }
       }
@@ -157,14 +158,22 @@ function createLevel () {
   refreshScore(level)
 }
 
+var score = 0
 var attemptsText
+var scoreText
 function refreshScore (level) {
   if (!attemptsText) {
-    attemptsText = new PIXI.Text('Attempts: 0/' + level.maxAttempts, {font: '24px Arial', fill: 0xff1010, align: 'center'})
+    attemptsText = new PIXI.Text('Cuts: 0/' + level.maxAttempts, {font: '24px Arial', fill: 0xFFFFFF, align: 'center'})
     engine.render.textContainer.addChild(attemptsText)
   }
+  if (!scoreText) {
+    scoreText = new PIXI.Text('Score: ' + score, {font: '24px Arial', fill: 0xFFFFFF, align: 'center'})
+    scoreText.x = 400
+    engine.render.textContainer.addChild(scoreText)
+  }
 
-  attemptsText.setText('Attempts: ' + level.attempts + '/' + level.maxAttempts)
+  attemptsText.text = 'Attempts: ' + level.attempts + '/' + level.maxAttempts
+  scoreText.text = 'Score: ' + score
   if (level.organs.length === 0) {
     popupMessage('You Won!!')
   }
