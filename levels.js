@@ -69,7 +69,7 @@ window.levels = [
     
     createBone (670, 200, 680, 330, 30)
 
-    var heart = createOrgan('heart', 370, 400, 0.2, level)
+    var heart = createOrgan('liver', 370, 400, 0.2, level)
 
     attachWithRope(engine.world, {
       fromPoint: {x: 600, y: 170},
@@ -115,7 +115,7 @@ window.levels = [
     
     var bone = createBone (70, 400, 420, 750, 30)
 
-    var heart = createOrgan('heart', 370, 520, 0.2, level)
+    var heart = createOrgan('kidney', 370, 520, 0.3, level)
 
     attachWithRope(engine.world, {
       fromPoint: {x: 600, y: 170},
@@ -158,7 +158,7 @@ window.levels = [
     
     var bone = createBone (250, 400, 570, 750, 30)
 
-    var heart = createOrgan('heart', 370, 420, 0.2, level)
+    var heart = createOrgan('stomach', 370, 420, 0.2, level)
 
     attachWithRope(engine.world, {
       fromPoint: {x: 750, y: 170},
