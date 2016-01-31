@@ -145,13 +145,13 @@ function createLevel () {
     cut.width = w * 1.6
     engine.render.backgroundContainer.addChild(cut)
 
-    /*
+    
       var graphics = new PIXI.Graphics()
       graphics.beginFill(0x0088FF, 0.2)
       graphics.drawRect(zone.min.x, zone.min.y, zone.max.x - zone.min.x, zone.max.y - zone.min.y)
 
       engine.render.backgroundContainer.addChild(graphics)
-     */
+     
   }
 
   startParticles(engine)
