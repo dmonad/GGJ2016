@@ -139,7 +139,7 @@ function addSword (engine, pos, level) {
     Matter.Events.on(mouseConstraint, 'mousedown', function (event) {
       if (level.attempts < level.maxAttempts) {
         level.attempts++
-        refreshScore(level)
+        refreshScore()
         moveswordto = Vector.clone(event.mouse.position)
       }
     })
@@ -200,6 +200,13 @@ function addSword (engine, pos, level) {
         window.setTimeout(function () {
           other.activate(sword)
         }, 0)
+      } else if (other.label === 'organ') {
+        if (!other._hurt) {
+          score -= other.scoreValue / 2
+          other._hurt = true
+          other.render.emotion = 'frown'
+          refreshScore()
+        }
       }
     }
   })
@@ -483,13 +490,14 @@ function createOrgan (organ, x, y, scale, level) {
         xScale: scale,
         yScale: scale
       },
-      emotion: Math.random() > 0.5 ? 'smile' : 'frown'
+      emotion: 'smile'
     }
   }, true)
 
   World.add(engine.world, [o])
-  
+
   o.scoreValue = organ.value
+  o.label = 'organ'
 
   level.organs.push(o)
 
