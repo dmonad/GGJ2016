@@ -123,7 +123,6 @@ function createLevel () {
             if (sprite.alpha <= 0) {
               window.clearInterval(interval)
               World.remove(engine.world, organ)
-              console.log('end')
             }
           }, 40)
           level.score++
