@@ -191,37 +191,37 @@ window.levels = [
       organs: [],
       targetZones: [{
         min: {
-          x: 30,
-          y: 50
+          x: 50,
+          y: 670
         },
         max: {
-          x: 230,
-          y: 116
+          x: 330,
+          y: 750
         }
       }],
       score: 0
     }
     
-    var bone = createBone (70, 400, 420, 750, 30)
+    var bone = createBone (250, 400, 570, 750, 30)
 
-    var heart = createOrgan('heart', 370, 520, 0.2, level)
+    var heart = createOrgan('heart', 370, 420, 0.2, level)
 
     attachWithRope(engine.world, {
-      fromPoint: {x: 600, y: 170},
+      fromPoint: {x: 750, y: 170},
       to: heart
     })
     attachWithRope(engine.world, {
-      fromPoint: {x: 120, y: 170},
+      fromPoint: {x: 270, y: 170},
       to: heart
     })
     putFireChakra(engine, {
       x: 110,
       y:710
-    }, 5)
-    putWoodChakra(engine, {
+    }, 7)
+    putWaterChakra(engine, {
       x: 600,
       y: 450
-    }, bone)
+    }, 2000)
 
     waitForSword(engine, level)
 
