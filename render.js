@@ -338,6 +338,7 @@ var Composite = Matter.Composite,
       sprite.rotation = body.angle
       sprite.scale.x = bodyRender.sprite.xScale || 1
       sprite.scale.y = bodyRender.sprite.yScale || 1
+      sprite.tint = bodyRender.sprite.tint === undefined ? 0xFFFFFF : bodyRender.sprite.tint
 
       if (bodyRender.emotion) {
         spriteId += '-emo'

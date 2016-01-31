@@ -170,7 +170,7 @@ function addSword (engine, pos, level) {
           // check Chakras
           if (explodeChakraIsActivated) {
             explodeChakraIsActivated = false
-            activateExplodeChakra(engine, sword.position)
+            activateExplodeChakra(engine, sword)
           }
         } else {
           var vel = Vector.mult(dir, 20 / len)
@@ -189,13 +189,18 @@ function addSword (engine, pos, level) {
   // Collision detection Sword <-> rope
   Matter.Events.on(engine, 'collisionStart', function (event) {
     var pair = event.pairs[0]
-    if (pair.bodyA.label === 'sword' || pair.bodyB.label === 'sword') {
-      if (pair.bodyA.label === 'rope' || pair.bodyB.label === 'rope') {
-        (pair.bodyA.label === 'rope' ? pair.bodyA : pair.bodyB).removeRope()
-      }
-      if (pair.bodyA.label === 'explodechakra' || pair.bodyB.label === 'explodechakra') {
+    var other
+    if (pair.bodyA.label === 'sword') {
+      other = pair.bodyB
+    } else if (pair.bodyB.label === 'sword') {
+      other = pair.bodyA
+    }
+    if (other) {
+      if (other.label === 'rope') {
+        other.removeRope()
+      } else if (other.label === 'chakra') {
         window.setTimeout(function () {
-          (pair.bodyA.label === 'explodechakra' ? pair.bodyA : pair.bodyB).activate()
+          other.activate(sword)
         }, 0)
       }
     }
@@ -215,7 +220,9 @@ var explosion = PIXI.Sprite.fromImage('img/explode.png')
 explosion.scale.x = 0.5
 explosion.scale.y = 0.5
 
-function activateExplodeChakra (engine, pos) {
+function activateExplodeChakra (engine, sword) {
+  var pos = sword.position
+  sword.render.sprite.tint = 0xFFFFFF
   playSoundeffect('explode')
   addEmitter(particleSettings.explosion2, 'img/particle.png', pos.x, pos.y, 3000)
   addEmitter(particleSettings.smokeRing, 'img/CartoonSmoke.png', pos.x, pos.y, 3000)
@@ -240,7 +247,7 @@ function activateExplodeChakra (engine, pos) {
   })
 }
 
-function putExplodeChakra (engine, pos) {
+function putChakra (engine, pos, name, activate) {
   var chakra = Bodies.circle(pos.x, pos.y, 20, {
     collisionFilter: {group: noncolliding},
     restitution: 0,
@@ -248,19 +255,28 @@ function putExplodeChakra (engine, pos) {
     isStatic: true,
     render: {
       sprite: {
-        texture: 'img/yinyang.png',
+        texture: 'img/' + name + '_chakra.png',
         xScale: 0.1,
         yScale: 0.1
       }
     }
   })
-  chakra.label = 'explodechakra'
-  chakra.activate = function () {
+  chakra.label = 'chakra'
+  chakra.activate = function (sword) {
     playSoundeffect('chakra')
     Matter.Composite.removeBody(engine.world, this)
-    explodeChakraIsActivated = true
+    activate(pos, sword)
   }
   World.add(engine.world, [chakra])
+
+  return chakra
+}
+
+function putExplodeChakra (engine, pos) {
+  return putChakra(engine, pos, 'fire', function (pos, sword) {
+    explodeChakraIsActivated = true
+    sword.render.sprite.tint = 0xFF0000
+  })
 }
 
 var boneWidth = 116
