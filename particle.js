@@ -34,6 +34,46 @@ function addEmitter (settings, img, x, y, time, body) {
 }
 
 var particleSettings = {
+  blood: {
+    'alpha': {
+      'start': 0.77,
+      'end': 0
+    },
+    'scale': {
+      'start': 0.25,
+      'end': 0.01,
+      'minimumScaleMultiplier': 1
+    },
+    'color': {
+      'start': '#c20017',
+      'end': '#8a1111'
+    },
+    'speed': {
+      'start': 400,
+      'end': 200
+    },
+    'acceleration': {
+      'x': 0,
+      'y': 800
+    },
+    'startRotation': {
+      'min': 30,
+      'max': 180
+    },
+    'rotationSpeed': {
+      'min': 1,
+      'max': 2
+    },
+    'lifetime': {
+      'min': 0.2,
+      'max': 0.8
+    },
+    'blendMode': 'normal',
+    'frequency': 0.001,
+    'emitterLifetime': 2,
+    'maxParticles': 500,
+    'spawnType ': 'burst'
+  },
   explosion2: {
     'alpha': {
       'start': 0.8,
