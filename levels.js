@@ -216,6 +216,32 @@ window.levels = [
 
     return level
   },
+  function bonuslevel (engine) {
+    var level = {
+      attempts: 0,
+      maxAttempts: 200000000,
+      organs: [],
+      targetZones: [{
+        min: {
+          x: 300,
+          y: 20
+        },
+        max: {
+          x: 570,
+          y: 200
+        }
+      }],
+      score: 0
+    }
+
+    var heart = createOrgan('heart', 370, 400, 0.2, level)
+    
+    var bone = createBone (670, 200, 680, 330, 30)
+    
+    addSword(engine, {x:300, y:300}, level)
+
+    return level
+  },
   function testLevel (engine) {
     var level = {
       attempts: 0,
