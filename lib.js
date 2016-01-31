@@ -139,7 +139,7 @@ function addSword (engine, pos, level) {
     Matter.Events.on(mouseConstraint, 'mousedown', function (event) {
       if (level.attempts < level.maxAttempts) {
         level.attempts++
-        refreshScore()
+        refreshScore(level)
         moveswordto = Vector.clone(event.mouse.position)
       }
     })

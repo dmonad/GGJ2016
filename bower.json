@@ -26,6 +26,6 @@
     "PreloadJS": "createjs/preloadjs#~0.6.2",
     "pixi-particles": "~1.5.2",
     "howler.js": "goldfire/howler.js#~1.1.29",
-    "animate.css": "daneden/animate.css#~3.5.1"
+    "animate.css": "~3.5.1"
   }
 }
