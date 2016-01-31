@@ -19,9 +19,6 @@ var chainStyle = {
   strokeStyle: '#F00'
 }
 
-// chakras!!
-var explodeChakraIsActivated = false
-
 /*
   opts = {
     fromPoint: {x:0,y:0},
@@ -118,6 +115,7 @@ function addSword (engine, pos, level) {
       }
     }
   })
+  sword._onStop = []
   sword.label = 'sword'
   World.add(engine.world, [sword])
 
@@ -167,10 +165,9 @@ function addSword (engine, pos, level) {
           // very near to the destination position
           Body.setVelocity(sword, dir)
 
-          // check Chakras
-          if (explodeChakraIsActivated) {
-            explodeChakraIsActivated = false
-            activateExplodeChakra(engine, sword)
+          while (sword._onStop.length > 0) {
+            var handler = sword._onStop.shift()
+            handler(engine, sword)
           }
         } else {
           var vel = Vector.mult(dir, 20 / len)
@@ -216,10 +213,6 @@ function waitForSword (engine, level) {
   Matter.Events.on(mouseConstraint, 'mouseup', listener)
 }
 
-var explosion = PIXI.Sprite.fromImage('img/explode.png')
-explosion.scale.x = 0.5
-explosion.scale.y = 0.5
-
 function activateExplodeChakra (engine, sword) {
   var pos = sword.position
   sword.render.sprite.tint = 0xFFFFFF
@@ -227,10 +220,6 @@ function activateExplodeChakra (engine, sword) {
   addEmitter(particleSettings.explosion2, 'img/particle.png', pos.x, pos.y, 3000)
   addEmitter(particleSettings.smokeRing, 'img/CartoonSmoke.png', pos.x, pos.y, 3000)
 
-  explosion.position = {
-    x: pos.x - explosion.width / 2,
-    y: pos.y - explosion.height / 2
-  }
   engine.world.bodies.forEach(function (body) {
     if (!['sword'].some(function (s) {
         return body.label === s
@@ -272,9 +261,9 @@ function putChakra (engine, pos, name, activate) {
   return chakra
 }
 
-function putExplodeChakra (engine, pos) {
+function putFireChakra (engine, pos) {
   return putChakra(engine, pos, 'fire', function (pos, sword) {
-    explodeChakraIsActivated = true
+    sword._onStop.push(activateExplodeChakra)
     sword.render.sprite.tint = 0xFF0000
   })
 }

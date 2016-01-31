@@ -35,12 +35,12 @@ window.levels = {
       to: heart
     })
 
-    putExplodeChakra(engine, {
+    putFireChakra(engine, {
       x: 200,
       y: 370
     })
 
-    putExplodeChakra(engine, {
+    putFireChakra(engine, {
       x: 600,
       y: 450
     })
@@ -84,12 +84,12 @@ window.levels = {
       to: heart
     })
 
-    putExplodeChakra(engine, {
+    putFireChakra(engine, {
       x: 200,
       y: 370
     })
 
-    putExplodeChakra(engine, {
+    putFireChakra(engine, {
       x: 600,
       y: 450
     })
