@@ -29,53 +29,56 @@ var engine = Engine.create(document.body, {
   })
 })
 
-var queue = new createjs.LoadQueue()
+var queue = new createjs.LoadQueue(true)
 
 var loadingText = new PIXI.Text('Loading...', {font: '24px Arial', fill: 0xff1010, align: 'center'})
 engine.render.textContainer.addChild(loadingText)
 
 function loadFiles () {
-  for (var organ in organs) {
-    queue.loadFile(organs[organ].collision)
-    queue.loadFile(organs[organ].image)
+  engine.render.textContainer.removeChild(loadingText)
+  var foreground = new PIXI.Sprite.fromImage('img/foreground.png')
+  engine.render.textContainer.addChild(foreground)
+  var background = new PIXI.Sprite.fromImage('img/background.png')
+  engine.render.backgroundContainer.addChild(background)
+  var promises = [buildBone()]
+  for (var n in organs) {
+    promises.push(buildPathLoadFile(organs[n]))
   }
+  Promise.all(promises).then(function (){
+    createLevel()
+  })
+}
 
-  queue.loadFile('img/bone_end_collision.svg')
-
-  // queue.on('complete', function () {
-    engine.render.textContainer.removeChild(loadingText)
-    var foreground = new PIXI.Sprite.fromImage('img/foreground.png')
-    engine.render.textContainer.addChild(foreground)
-    var background = new PIXI.Sprite.fromImage('img/background.png')
-    engine.render.backgroundContainer.addChild(background)
-    queue.on('complete', function () {
-      buildPaths()
-      createLevel()
+function buildPathLoadFile (organ) {
+  return new Promise(function (resolve){
+    var queue = new createjs.LoadQueue(true)
+    queue.loadFile(organ.collision)
+    queue.loadFile(organ.image)
+    queue.on('complete', function (){
+      var p = organ._path = buildPath(queue.getResult(organ.collision), false)
+      organ._bounds = Bounds.create(p)
+      var img = queue.getResult(organ.image)
+      organ._width = img.width
+      organ._height = img.height
+      resolve()
     })
-  //})
-
+  })
 }
 
 var boneEndPath, boneEndBounds
 
-function buildPath (file) {
-  var data = queue.getResult(file)
+function buildPath (data) {
   var path = $(data).find('path')[0]
   return Svg.pathToVertices(path, 10)
 }
 
-function buildPaths () {
-  boneEndPath = buildPath('img/bone_end_collision.svg')
-  boneEndBounds = Bounds.create(boneEndPath)
-
-  for (var organ in organs) {
-    organ = organs[organ]
-    var p = organ._path = buildPath(organ.collision, false)
-    organ._bounds = Bounds.create(p)
-    var img = queue.getResult(organ.image)
-    organ._width = img.width
-    organ._height = img.height
-  }
+function buildBone () {
+  var queue = new createjs.LoadQueue(true)
+  queue.loadFile('img/bone_end_collision.svg')
+  queue.on('complete', function () {
+    boneEndPath = buildPath(queue.getResult('img/bone_end_collision.svg'))
+    boneEndBounds = Bounds.create(boneEndPath)
+  })
 }
 
 function createBox () {
