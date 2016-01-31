@@ -277,6 +277,7 @@ function putChakra (engine, pos, name, activate, value) {
 
 function putFireChakra (engine, pos, intensity) {
   return putChakra(engine, pos, 'fire', function (pos, sword) {
+    console.log(sword.explodeIntensity)
     sword.explodeIntensity += intensity || 1
     sword._onStop.push(activateExplodeChakra)
     sword.render.sprite.tint = 0xFF0000
