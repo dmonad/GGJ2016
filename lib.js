@@ -195,19 +195,22 @@ function addSword (engine, pos, level) {
     }
     if (other) {
       if (other.label === 'rope') {
+        currentScore += 1
         other.removeRope()
       } else if (other.label === 'chakra') {
+        currentScore += 3
+        currentMult += 1
         window.setTimeout(function () {
           other.activate(sword)
         }, 0)
       } else if (other.label === 'organ') {
         if (!other._hurt) {
-          score -= other.scoreValue / 2
+          currentScore -= other.scoreValue / 2
           other._hurt = true
           other.render.emotion = 'frown'
-          refreshScore()
         }
       }
+      refreshScore(other.position.x, other.position.y)
     }
   })
 }

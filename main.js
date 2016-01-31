@@ -43,16 +43,16 @@ function loadFiles () {
   queue.loadFile('img/bone_end_collision.svg')
 
   // queue.on('complete', function () {
-    engine.render.textContainer.removeChild(loadingText)
-    var foreground = new PIXI.Sprite.fromImage('img/foreground.png')
-    engine.render.textContainer.addChild(foreground)
-    var background = new PIXI.Sprite.fromImage('img/background.png')
-    engine.render.backgroundContainer.addChild(background)
-    queue.on('complete', function () {
-      buildPaths()
-      createLevel()
-    })
-  //})
+  engine.render.textContainer.removeChild(loadingText)
+  var foreground = new PIXI.Sprite.fromImage('img/foreground.png')
+  engine.render.textContainer.addChild(foreground)
+  var background = new PIXI.Sprite.fromImage('img/background.png')
+  engine.render.backgroundContainer.addChild(background)
+  queue.on('complete', function () {
+    buildPaths()
+    createLevel()
+  })
+  // })
 
 }
 
@@ -141,13 +141,13 @@ function createLevel () {
     cut.width = w * 1.6
     engine.render.backgroundContainer.addChild(cut)
 
-    /*
-      var graphics = new PIXI.Graphics()
-      graphics.beginFill(0x0088FF, 0.2)
-      graphics.drawRect(zone.min.x, zone.min.y, zone.max.x - zone.min.x, zone.max.y - zone.min.y)
+  /*
+    var graphics = new PIXI.Graphics()
+    graphics.beginFill(0x0088FF, 0.2)
+    graphics.drawRect(zone.min.x, zone.min.y, zone.max.x - zone.min.x, zone.max.y - zone.min.y)
 
-      engine.render.backgroundContainer.addChild(graphics)
-     */
+    engine.render.backgroundContainer.addChild(graphics)
+   */
   }
 
   startParticles(engine)
@@ -155,26 +155,67 @@ function createLevel () {
 }
 
 var score = 0
+var currentScore = 0
+var currentMult = 1
 var attemptsText
 var scoreText
-function refreshScore () {
+var lastScore
+var lastMult
+var killTimeout
+function refreshScore (x, y) {
   if (!attemptsText) {
-    attemptsText = new PIXI.Text('Cuts: 0/' + level.maxAttempts, {font: '24px Arial', fill: 0xFFFFFF, align: 'center'})
+    attemptsText = new PIXI.Text('Cuts: 0/' + level.maxAttempts, {font: '24px bloodfont', fill: 0xFFFFFF, align: 'center'})
     engine.render.textContainer.addChild(attemptsText)
   }
   if (!scoreText) {
-    scoreText = new PIXI.Text('Score: ' + score, {font: '24px Arial', fill: 0xFFFFFF, align: 'center'})
+    scoreText = new PIXI.Text('Score: 0', {font: '24px bloodfont', fill: 0xFFFFFF, align: 'center'})
     scoreText.x = 400
     engine.render.textContainer.addChild(scoreText)
   }
 
+  if (lastScore !== currentScore || lastMult !== currentMult) {
+    if (killTimeout) {
+      window.clearTimeout(killTimeout)
+      killTimeout = null
+    }
+  }
+  if (lastMult !== currentMult && x !== undefined) {
+    var multText = new PIXI.Text('x' + currentMult, {font: '80px bloodfont', fill: 0xAA0000, align: 'center'})
+    multText.x = x
+    multText.y = y
+    multText.alpha = 0.7
+    engine.render.textContainer.addChild(multText)
+    window.setTimeout(function () {
+      var interval = window.setInterval(function () {
+        multText.alpha -= 0.07
+      }, 50)
+      window.setTimeout(function () {
+        engine.render.textContainer.removeChild(multText)
+        window.clearInterval(interval)
+      }, 500)
+    }, 1000)
+  }
+
+  lastScore = currentScore
+  lastMult = currentMult
+
+  killTimeout = window.setTimeout(function () {
+    score += currentScore * currentMult
+    currentScore = 0
+    currentMult = 1
+    killTimeout = null
+    refreshScore()
+  }, 2000)
+
+
   attemptsText.text = 'Attempts: ' + level.attempts + '/' + level.maxAttempts
-  scoreText.text = 'Score: ' + score
+  var sign = currentScore > 0 ? ' + ' : (currentScore < 0 ? ' - ' : '')
+  scoreText.text = 'Score: ' + score + (currentScore !== 0 ? sign + Math.abs(currentScore) + (currentMult > 1 ? 'x' + currentMult : '') : '')
   if (level.organs.length === 0) {
     popupMessage('You Won!!')
   }
   if (level.attempts === level.maxAttempts) {
-    setTimeout(function (){
+    setTimeout(function () {
       if (level.organs.length > 0) {
         popupMessage('You Loose :(')
       }
@@ -200,17 +241,15 @@ function clearGame () {
   Matter.World.clear(engine.world, false, true)
 }
 
-$(window).on('hashchange', function() {
-  if (location.hash.slice(1,6) === 'level') {
+$(window).on('hashchange', function () {
+  if (location.hash.slice(1, 6) === 'level') {
     location.hash = '#' + location.hash.slice(6)
   }
   location.reload()
 })
-
 
 // Don't fucking delete my awesome mouse listener!
 // There are comments you know ?
 Matter.Events.on(MouseConstraint.create(engine), 'mousemove', function (event) {
   console.log(JSON.stringify(event.mouse.position))
 })
-
