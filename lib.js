@@ -543,6 +543,9 @@ var sounds = {
   ],
   'bone-crush': [
     new Howl({urls: ['sounds/bone.ogg']})
+  ],
+  intro: [
+    new Howl({urls: ['sounds/intro.ogg']})
   ]
 }
 
@@ -552,7 +555,9 @@ function playSoundeffect (name) {
   var effects = sounds[name]
   if (effects.length > 0) {
     // var choose = Math.floor(Math.random() * effects.length)
-    effects[(_soundRot[name]++) % effects.length].play()
+    var snd = effects[(_soundRot[name]++) % effects.length]
+    snd.play()
+    return snd
   }
 }
 

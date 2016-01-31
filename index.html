@@ -31,8 +31,8 @@
       body {
           display: table-cell;
           vertical-align: middle;
-          background-color: 
       }
+      
       @font-face {
         font-family: bloodfont;
         src: url(fonts/strange/strange.ttf);
@@ -42,13 +42,17 @@
         font-family: bloodfont;
         color: darkred;
         position: relative;
-        top: -720px;
-        left: 50px;
-        width: 900px;
-        height: 0;
+        width: 1000px;
+        height: 800px;
         text-align: center;
+        background: rgba(0, 0, 0, 0.6);
       }
+      
       #popup {
+        
+        margin-top: -810px;
+      }
+      #popup p {
         -webkit-animation-duration: 2.5s;
         -webkit-animation-delay: 0s;
         -webkit-animation-iteration-count: 1;
@@ -66,10 +70,27 @@
         color: inherit;
       }
       #title {
-        font-size: 8em;
+        font-size: 200px;
+        line-height: 600px;
+        height: 600px;
       }
       h1 {
         font-size: 2em;
+        margin: 0;
+      }
+      #intro {
+        margin-top: -800px;
+                line-height: 400px;
+      }
+      #intro p {
+        margin: 0;
+        line-height: 30px;
+        font-size: 30px;
+      }
+      #intro p.second {
+        margin: 0;
+        line-height: 100px;
+        font-size: 50px;
       }
     </style>
     <script>
@@ -77,8 +98,8 @@
         document.querySelector('#title').textContent = text
         var popup = document.querySelector('#popup')
         popup.setAttribute('style','visibility:visible;')
-        popup.classList.add('animated')
-        popup.classList.add('bounceIn')
+        document.querySelector('#title').classList.add('animated')
+        document.querySelector('#title').classList.add('bounceIn')
 
         var level = Number((location.hash.length > 0 ? location.hash : '#1').slice(1))
         document.querySelector('#restart').setAttribute('href', './#level'+level)
@@ -96,9 +117,18 @@
         }
         if (location.hash === '#1') {
           document.querySelector('#intro').setAttribute('style', 'visibility: visible;')
-          setTimeout(function () {
+          
+          var sound = playSoundeffect('intro')
+            console.log(sound)
+          
+          sound.on('end', function () {
             document.querySelector('#intro').setAttribute('style', 'visibility: hidden;')
-          }, 3000)
+          })
+          
+          $(document.querySelector('#intro')).click(function () {
+            sound.stop()
+            document.querySelector('#intro').setAttribute('style', 'visibility: hidden;')
+          })
         }
       })
 
@@ -117,6 +147,7 @@ Perform seppuku the proper way and force your organs to the exit node cutting th
 Find out what each elemental ki does.
 See you on the other side, samurai.
  </p>
+ <p class="second">Click to start</p>
     </div>
     <!--div id="lost">
       You Lost!! 
