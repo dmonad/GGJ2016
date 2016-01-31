@@ -216,12 +216,12 @@ function refreshScore (x, y) {
   var sign = currentScore > 0 ? ' + ' : (currentScore < 0 ? ' - ' : '')
   scoreText.text = 'Score: ' + score + (currentScore !== 0 ? sign + Math.abs(currentScore) + (currentMult > 1 ? 'x' + currentMult : '') : '')
   if (level.organs.length === 0) {
-    popupMessage('You Won!!')
+    popupMessage('You Win!!')
   }
   if (level.attempts === level.maxAttempts) {
     setTimeout(function () {
       if (level.organs.length > 0) {
-        popupMessage('You Loose :(')
+        popupMessage('You Lose :/')
       }
     }, 3000)
   }
