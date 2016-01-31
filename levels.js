@@ -80,7 +80,7 @@ window.levels = {
       to: heart
     })
 
-    putFireChakra(engine, {
+    putWaterChakra(engine, {
       x: 600,
       y: 450
     }, 10)
