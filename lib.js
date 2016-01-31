@@ -208,6 +208,7 @@ function addSword (engine, pos, level) {
           currentScore -= other.scoreValue / 2
           other._hurt = true
           other.render.emotion = 'frown'
+          playSoundeffect ('hit') 
         }
       }
       refreshScore(other.position.x, other.position.y)
@@ -264,7 +265,7 @@ function putChakra (engine, pos, name, activate, value) {
   })
   chakra.label = 'chakra'
   chakra.activate = function (sword) {
-    playSoundeffect('chakra')
+    playSoundeffect(name + '-chakra')
     Matter.Composite.removeBody(engine.world, this)
     activate(pos, sword)
   }
@@ -513,19 +514,42 @@ var sounds = {
     new Howl({urls: ['sounds/splash2.ogg']}),
     new Howl({urls: ['sounds/splash3.ogg']})
   ],
-  chakra: [
-    new Howl({urls: ['sounds/splash.ogg']})
+  'wood-chakra': [
+    new Howl({urls: ['sounds/wood.ogg']})
+  ],
+  'water-chakra': [
+    new Howl({urls: ['sounds/water.ogg']})
+  ],
+  'fire-chakra': [],
+  'metal-chakra': [
+    new Howl({urls: ['sounds/metal.ogg']})
   ],
   explode: [
-    new Howl({urls: ['sounds/splash.ogg']})
+    new Howl({urls: ['sounds/explosion1.ogg']}),
+    new Howl({urls: ['sounds/explosion2.ogg']})
+  ],
+  pain: [
+    new Howl({urls: ['sounds/pain1.ogg'], volume: 0.5}),
+    new Howl({urls: ['sounds/pain2.ogg'], volume: 0.5}),
+    new Howl({urls: ['sounds/pain3.ogg'], volume: 0.5}),
+    new Howl({urls: ['sounds/pain4.ogg'], volume: 0.5})
+  ],
+  hit: [
+    new Howl({urls: ['sounds/hit1.ogg'], volume: 0.5}),
+    new Howl({urls: ['sounds/hit2.ogg'], volume: 0.5}),
+    new Howl({urls: ['sounds/hit3.ogg'], volume: 0.5}),
+    new Howl({urls: ['sounds/hit4.ogg'], volume: 0.5}),
+    new Howl({urls: ['sounds/hit5.ogg'], volume: 0.5})
   ],
   'bone-crush': [
-    new Howl({urls: ['sounds/splash.ogg']})
+    new Howl({urls: ['sounds/bone.ogg']})
   ]
 }
 
 function playSoundeffect (name) {
   var effects = sounds[name]
-  var choose = Math.floor(Math.random() * effects.length)
-  effects[choose].play()
+  if (effects.length > 0) {
+    var choose = Math.floor(Math.random() * effects.length)
+    effects[choose].play()
+  }
 }
