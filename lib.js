@@ -20,7 +20,7 @@ var chainStyle = {
 }
 
 // chakras!!
-var explodeChakraIsActivated = false
+var explodeChakraIsActivated = 0
 
 
 /*
@@ -228,8 +228,8 @@ function addSword (engine, pos, level) {
 
           // check Chakras
           if (explodeChakraIsActivated) {
-            explodeChakraIsActivated = false
-            activateExplodeChakra(engine, sword.position)
+            activateExplodeChakra(engine, sword.position, explodeChakraIsActivated)
+            explodeChakraIsActivated = 0
           }
         } else {
           var vel = Vector.mult(dir, 20 / len)
@@ -258,6 +258,11 @@ function addSword (engine, pos, level) {
         }, 0)
       }
     }
+    if (pair.bodyA.label === 'rope' || pair.bodyB.label === 'rope') {
+      if (pair.bodyA.label === 'bone' || pair.bodyB.label === 'bone') {
+        (pair.bodyA.label === 'rope' ? pair.bodyA : pair.bodyB).removeRope()
+      }
+    }
   })
 }
 
@@ -274,7 +279,8 @@ var explosion = PIXI.Sprite.fromImage('img/explode.png')
 explosion.scale.x = 0.5
 explosion.scale.y = 0.5
 
-function activateExplodeChakra (engine, pos) {
+function activateExplodeChakra (engine, pos, intensity) {
+  intensity = intensity || 1
   playSoundeffect('explode')
   addEmitter(particleSettings.explosion2, 'img/particle.png', pos.x, pos.y, 3000)
   addEmitter(particleSettings.smokeRing, 'img/CartoonSmoke.png', pos.x, pos.y, 3000)
@@ -291,7 +297,7 @@ function activateExplodeChakra (engine, pos) {
       var dist = Vector.magnitude(force)
       if (dist < 600) {
         // var power = 0.01 * Math.min(Math.sqrt((600 - dist) / 600), 0.1)
-        var power = 0.03 * Math.pow((600 - dist) / 600, 4)
+        var power = intensity * 0.03 * Math.pow((600 - dist) / 600, 4)
         force = Vector.mult(force, power)
         Body.applyForce(body, pos, force)
       }
@@ -299,7 +305,8 @@ function activateExplodeChakra (engine, pos) {
   })
 }
 
-function putExplodeChakra (engine, pos) {
+function putExplodeChakra (engine, pos, intensity) {
+  intensity = intensity || 1
   var chakra = Bodies.circle(pos.x, pos.y, 20, {
     collisionFilter: {group: noncolliding},
     restitution: 0,
@@ -317,7 +324,7 @@ function putExplodeChakra (engine, pos) {
   chakra.activate = function () {
     playSoundeffect('chakra')
     Matter.Composite.removeBody(engine.world, this)
-    explodeChakraIsActivated = true
+    explodeChakraIsActivated += intensity
   }
   World.add(engine.world, [chakra])
 }
@@ -387,10 +394,13 @@ function createBone (x1, y1, x2, y2, w) {
     collisionFilter: { group: boneGroup },
     isStatic: true
   })
+  end1.label = 'bone'
+  end2.label = 'bone'
 
   var angle = -Math.atan((x1 - x2) / (y1 - y2))
 
   var bone = Composite.create({bodies: [shaft, end1, end2] })
+  bone.label = 'bone'
   Composite.rotate(bone, angle, {x: cx, y: cy})
 
   World.add(engine.world, bone)
