@@ -338,12 +338,15 @@ var Composite = Matter.Composite,
       sprite.rotation = body.angle
       sprite.scale.x = bodyRender.sprite.xScale || 1
       sprite.scale.y = bodyRender.sprite.yScale || 1
+      sprite.tint = bodyRender.sprite.tint === undefined ? 0xFFFFFF : bodyRender.sprite.tint
 
       if (bodyRender.emotion) {
         spriteId += '-emo'
         sprite = render.sprites[spriteId]
 
         if (!sprite || bodyRender.emotion !== bodyRender._oldEmotion) {
+          if ( sprite )
+            spriteContainer.removeChild(sprite)
           sprite = render.sprites[spriteId] = new PIXI.Sprite(_getTexture(render, 'img/'+bodyRender.emotion+'.png'))
           bodyRender._oldEmotion = bodyRender.emotion
         }

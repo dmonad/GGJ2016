@@ -19,10 +19,6 @@ var chainStyle = {
   strokeStyle: '#F00'
 }
 
-// chakras!!
-var explodeChakraIsActivated = 0
-
-
 /*
   opts = {
     fromPoint: {x:0,y:0},
@@ -38,92 +34,34 @@ function attachWithRope (world, opts) { // from, body, bodyPoint, length) {
   function removeRope () {
     var self = this
     window.setTimeout(function () {
-      var i = ropeB.bodies.indexOf(self)
-      Matter.Composite.removeConstraintAt(ropeB, i)
+      var partners = []
+      for (var i = 0; i < ropeB.constraints.length;) {
+        var constraint = ropeB.constraints[i]
+        if (constraint.bodyA === self) {
+          Matter.Composite.removeConstraintAt(ropeB, i)
+          if (constraint.bodyB) partners.push(constraint.bodyB)
+        } else if (constraint.bodyB === self) {
+          Matter.Composite.removeConstraintAt(ropeB, i)
+          if (constraint.bodyA) partners.push(constraint.bodyA)
+        } else {
+          i++
+        }
+      }
+      Matter.Composite.removeBody(ropeB, self)
+
+      for (i = 0; i < partners.length; i++) {
+        var body = partners[i]
+        addEmitter(particleSettings.blood, 'img/particle.png', body.position.x, body.position.y, 4000, body)
+      }
+
+      var settings = Common.clone(particleSettings.blood)
+      settings.startRotation = { min: 0, max: 360 }
+      settings.acceleration = { x: 0, y: 200 }
+      settings.emitterLifetime = 0.2
+      addEmitter(settings, 'img/particle.png', self.position.x, self.position.y, 4000)
     }, 0)
-    var emitSettings = {
-      'alpha': {
-        'start': 0.77,
-        'end': 0
-      },
-      'scale': {
-        'start': 0.25,
-        'end': 0.01,
-        'minimumScaleMultiplier': 1
-      },
-      'color': {
-        'start': '#c20017',
-        'end': '#8a1111'
-      },
-      'speed': {
-        'start': 400,
-        'end': 200
-      },
-      'acceleration': {
-        'x': 0,
-        'y': 800
-      },
-      'startRotation': {
-        'min': 30,
-        'max': 180
-      },
-      'rotationSpeed': {
-        'min': 1,
-        'max': 2
-      },
-      'lifetime': {
-        'min': 0.2,
-        'max': 0.8
-      },
-      'blendMode': 'normal',
-      'frequency': 0.001,
-      'emitterLifetime': 2,
-      'maxParticles': 500,
-      'spawnType ': 'burst'
-    }
-
-    var emitter, body, e
-
-    var j = ropeB.bodies.indexOf(self)
-    if (j < ropeB.bodies.length - 1) {
-      body = ropeB.bodies[j + 1]
-      e = $.extend({}, emitSettings)
-      e.pos = { x: body.position.x, y: body.position.y }
-
-      emitter = new cloudkid.Emitter(engine.render.textContainer, [PIXI.Texture.fromImage('img/particle.png')], e)
-      emitter._body = body
-      emitter.emit = true
-      emitters.push(emitter)
-      window.setTimeout(function () {
-        emitter._remove = true
-      }, 4000)
-    }
-    body = ropeB.bodies[j]
-    e = $.extend({}, emitSettings)
-    e.pos = { x: body.position.x, y: body.position.y }
-    playSoundeffect('splash')
-
-    emitter = new cloudkid.Emitter(engine.render.textContainer, [PIXI.Texture.fromImage('img/particle.png')], e)
-    emitter._body = body
-    emitter.emit = true
-    emitters.push(emitter)
-    window.setTimeout(function () {
-      emitter._remove = true
-    }, 4000)
-
-    e = $.extend({}, emitSettings)
-    e.pos = { x: self.position.x, y: self.position.y }
-    e.startRotation = { min: 0, max: 360 }
-    e.emitterLifetime = 0.2
-
-    emitter = new cloudkid.Emitter(engine.render.textContainer, [PIXI.Texture.fromImage('img/particle.png')], e)
-    emitter.emit = true
-    emitters.push(emitter)
-    window.setTimeout(function () {
-      emitter._remove = true
-    }, 4000)
-
   }
+
   var ropeB = Matter.Composites.stack(opts.fromPoint.x, opts.fromPoint.y, 1, Math.ceil(length / 40), 20, 25, function (x, y) {
     var c = Matter.Bodies.circle(x, y, 5, {
       label: 'rope',
@@ -177,7 +115,9 @@ function addSword (engine, pos, level) {
       }
     }
   })
+  sword._onStop = []
   sword.label = 'sword'
+  sword.explodeIntensity = 0
   World.add(engine.world, [sword])
 
   var bloodLayer = new PIXI.Graphics()
@@ -226,10 +166,9 @@ function addSword (engine, pos, level) {
           // very near to the destination position
           Body.setVelocity(sword, dir)
 
-          // check Chakras
-          if (explodeChakraIsActivated) {
-            activateExplodeChakra(engine, sword.position, explodeChakraIsActivated)
-            explodeChakraIsActivated = 0
+          while (sword._onStop.length > 0) {
+            var handler = sword._onStop.shift()
+            handler(engine, sword)
           }
         } else {
           var vel = Vector.mult(dir, 20 / len)
@@ -248,20 +187,31 @@ function addSword (engine, pos, level) {
   // Collision detection Sword <-> rope
   Matter.Events.on(engine, 'collisionStart', function (event) {
     var pair = event.pairs[0]
-    if (pair.bodyA.label === 'sword' || pair.bodyB.label === 'sword') {
-      if (pair.bodyA.label === 'rope' || pair.bodyB.label === 'rope') {
-        (pair.bodyA.label === 'rope' ? pair.bodyA : pair.bodyB).removeRope()
-      }
-      if (pair.bodyA.label === 'explodechakra' || pair.bodyB.label === 'explodechakra') {
-        window.setTimeout(function () {
-          (pair.bodyA.label === 'explodechakra' ? pair.bodyA : pair.bodyB).activate()
-        }, 0)
-      }
+    var other
+    if (pair.bodyA.label === 'sword' || pair.bodyA.label === 'bone') {
+      other = pair.bodyB
+    } else if (pair.bodyB.label === 'sword' || pair.bodyB.label === 'bone') {
+      other = pair.bodyA
     }
-    if (pair.bodyA.label === 'rope' || pair.bodyB.label === 'rope') {
-      if (pair.bodyA.label === 'bone' || pair.bodyB.label === 'bone') {
-        (pair.bodyA.label === 'rope' ? pair.bodyA : pair.bodyB).removeRope()
+    if (other) {
+      if (other.label === 'rope') {
+        currentScore += 1
+        other.removeRope()
+      } else if (other.label === 'chakra') {
+        currentScore += 3
+        currentMult += 1
+        window.setTimeout(function () {
+          other.activate(sword)
+        }, 0)
+      } else if (other.label === 'organ') {
+        if (!other._hurt) {
+          currentScore -= other.scoreValue / 2
+          other._hurt = true
+          other.render.emotion = 'frown'
+          playSoundeffect ('hit') 
+        }
       }
+      refreshScore(other.position.x, other.position.y)
     }
   })
 }
@@ -275,20 +225,13 @@ function waitForSword (engine, level) {
   Matter.Events.on(mouseConstraint, 'mouseup', listener)
 }
 
-var explosion = PIXI.Sprite.fromImage('img/explode.png')
-explosion.scale.x = 0.5
-explosion.scale.y = 0.5
-
-function activateExplodeChakra (engine, pos, intensity) {
-  intensity = intensity || 1
+function activateExplodeChakra (engine, sword) {
+  var pos = sword.position
+  sword.render.sprite.tint = 0xFFFFFF
   playSoundeffect('explode')
   addEmitter(particleSettings.explosion2, 'img/particle.png', pos.x, pos.y, 3000)
   addEmitter(particleSettings.smokeRing, 'img/CartoonSmoke.png', pos.x, pos.y, 3000)
 
-  explosion.position = {
-    x: pos.x - explosion.width / 2,
-    y: pos.y - explosion.height / 2
-  }
   engine.world.bodies.forEach(function (body) {
     if (!['sword'].some(function (s) {
         return body.label === s
@@ -297,16 +240,16 @@ function activateExplodeChakra (engine, pos, intensity) {
       var dist = Vector.magnitude(force)
       if (dist < 600) {
         // var power = 0.01 * Math.min(Math.sqrt((600 - dist) / 600), 0.1)
-        var power = intensity * 0.03 * Math.pow((600 - dist) / 600, 4)
+        var power = sword.explodeIntensity * 0.03 * Math.pow((600 - dist) / 600, 4)
         force = Vector.mult(force, power)
         Body.applyForce(body, pos, force)
       }
     }
   })
+  sword.explodeIntensity = 1
 }
 
-function putExplodeChakra (engine, pos, intensity) {
-  intensity = intensity || 1
+function putChakra (engine, pos, name, activate, value) {
   var chakra = Bodies.circle(pos.x, pos.y, 20, {
     collisionFilter: {group: noncolliding},
     restitution: 0,
@@ -314,19 +257,112 @@ function putExplodeChakra (engine, pos, intensity) {
     isStatic: true,
     render: {
       sprite: {
-        texture: 'img/yinyang.png',
+        texture: 'img/' + name + '_chakra.png',
         xScale: 0.1,
         yScale: 0.1
       }
     }
   })
-  chakra.label = 'explodechakra'
-  chakra.activate = function () {
-    playSoundeffect('chakra')
+  chakra.label = 'chakra'
+  chakra.activate = function (sword) {
+    playSoundeffect(name + '-chakra')
     Matter.Composite.removeBody(engine.world, this)
-    explodeChakraIsActivated += intensity
+    activate(pos, sword)
   }
   World.add(engine.world, [chakra])
+
+  return chakra
+}
+
+function putFireChakra (engine, pos, intensity) {
+  return putChakra(engine, pos, 'fire', function (pos, sword) {
+    sword.explodeIntensity += intensity || 1
+    sword._onStop.push(activateExplodeChakra)
+    sword.render.sprite.tint = 0xFF0000
+  })
+}
+
+function putWaterChakra (engine, pos, strength, limit) {
+  strength = strength || 200
+  limit = limit || 15
+  return putChakra(engine, pos, 'water', function (pos, sword) {
+    var handler = function (event) {
+      engine.world.bodies.forEach(function (body) {
+        if (!['sword'].some(function (s) {
+            return body.label === s
+          })) {
+          var force = Vector.sub(body.position, sword.position)
+          var dist = Vector.magnitude(force)
+          var factor = strength / (dist * dist)
+          var resultForce = Vector.mult(Vector.normalise(force), -factor)
+          Body.applyForce(body, body.position, resultForce)
+          if (Vector.magnitude(body.velocity) > limit) {
+            body.velocity = Vector.mult(Vector.normalise(body.velocity), limit)
+          }
+        }
+      })
+    }
+
+    Events.on(engine, 'beforeUpdate', handler)
+
+    window.setTimeout(function () {
+      Events.off(engine, 'beforeUpdate', handler)
+      sword.render.sprite.tint = 0xFFFFFF
+    }, 2000)
+
+    sword.render.sprite.tint = 0x0000FF
+  })
+}
+
+function destroyBone (world, bone) {
+  playSoundeffect('bone-crush')
+  var settings = Common.clone(particleSettings.bone)
+  var verts = []
+  for (var i = 0; i < bone.bodies.length; i++) {
+    verts = verts.concat(bone.bodies[i].vertices)
+  }
+  var bb = Bounds.create(verts)
+  settings.spawnRect = {
+    'x': bb.min.x,
+    'y': bb.min.y,
+    'w': bb.max.x - bb.min.x,
+    'h': bb.max.y - bb.min.y
+  }
+  addEmitter(settings, 'img/particle.png', 0, 0, 4000)
+  window.setTimeout(function () {
+    Composite.remove(world, bone)
+  }, 0)
+}
+
+function putMetalChakra (engine, pos) {
+  return putChakra(engine, pos, 'metal', function (pos, sword) {
+    var handler = function (event) {
+      var pair = event.pairs[0]
+      var bone = pair.bodyA._bone || pair.bodyA._bone
+      if (bone !== undefined) {
+        destroyBone(engine.world, bone)
+      }
+    }
+
+    Matter.Events.on(engine, 'collisionStart', handler)
+
+    sword._onStop.push(function () {
+      Events.off(engine, 'collisionStart', handler)
+      sword.render.sprite.tint = 0xFFFFFF
+    })
+
+    sword.render.sprite.tint = 0xFFFF00
+  })
+}
+
+function putWoodChakra (engine, pos, bone) {
+  bone.bodies.forEach(function (part) {
+    part.render.sprite.tint = 0x6C2424
+  })
+
+  return putChakra(engine, pos, 'wood', function (pos, sword) {
+    destroyBone(engine.world, bone)
+  })
 }
 
 var boneWidth = 116
@@ -394,13 +430,16 @@ function createBone (x1, y1, x2, y2, w) {
     collisionFilter: { group: boneGroup },
     isStatic: true
   })
-  end1.label = 'bone'
-  end2.label = 'bone'
 
   var angle = -Math.atan((x1 - x2) / (y1 - y2))
 
   var bone = Composite.create({bodies: [shaft, end1, end2] })
-  bone.label = 'bone'
+  shaft.label = 'boneBody'
+  end1.label = 'bone'
+  end2.label = 'bone'
+  shaft._bone = bone
+  end1._bone = bone
+  end2._bone = bone
   Composite.rotate(bone, angle, {x: cx, y: cy})
 
   World.add(engine.world, bone)
@@ -412,23 +451,28 @@ var organs = {
   liver: {
     image: 'img/liver.png',
     collision: 'img/liver.svg',
+    value: 5
   },
   heart: {
     image: 'img/heart.png',
     collision: 'img/heart.svg',
+    value: 10
   },
   kidney: {
     image: 'img/kidney.png',
     collision: 'img/kidney.svg',
+    value: 8
   },
   lungs: {
     image: 'img/lungs.png',
     collision: 'img/lungs.svg',
+    value: 6
   },
   stomach: {
     image: 'img/stomach.png',
     collision: 'img/stomach.svg',
-  },
+    value: 3
+  }
 }
 
 function createOrgan (organ, x, y, scale, level) {
@@ -441,6 +485,7 @@ function createOrgan (organ, x, y, scale, level) {
 
   var o = Bodies.fromVertices(x, y, [vertices], {
     collisionFilter: {group: noncolliding},
+    frictionAir: 0.1,
     render: {
       fillStyle: 'none',
       strokeStyle: '#FF0000',
@@ -449,11 +494,14 @@ function createOrgan (organ, x, y, scale, level) {
         xScale: scale,
         yScale: scale
       },
-      emotion: Math.random() > 0.5 ? 'smile' : 'frown'
+      emotion: 'smile'
     }
   }, true)
 
   World.add(engine.world, [o])
+
+  o.scoreValue = organ.value
+  o.label = 'organ'
 
   level.organs.push(o)
 
@@ -466,16 +514,42 @@ var sounds = {
     new Howl({urls: ['sounds/splash2.ogg']}),
     new Howl({urls: ['sounds/splash3.ogg']})
   ],
-  chakra: [
-    new Howl({urls: ['sounds/splash.ogg']})
+  'wood-chakra': [
+    new Howl({urls: ['sounds/wood.ogg']})
+  ],
+  'water-chakra': [
+    new Howl({urls: ['sounds/water.ogg']})
+  ],
+  'fire-chakra': [],
+  'metal-chakra': [
+    new Howl({urls: ['sounds/metal.ogg']})
   ],
   explode: [
-    new Howl({urls: ['sounds/splash.ogg']})
+    new Howl({urls: ['sounds/explosion1.ogg']}),
+    new Howl({urls: ['sounds/explosion2.ogg']})
+  ],
+  pain: [
+    new Howl({urls: ['sounds/pain1.ogg'], volume: 0.5}),
+    new Howl({urls: ['sounds/pain2.ogg'], volume: 0.5}),
+    new Howl({urls: ['sounds/pain3.ogg'], volume: 0.5}),
+    new Howl({urls: ['sounds/pain4.ogg'], volume: 0.5})
+  ],
+  hit: [
+    new Howl({urls: ['sounds/hit1.ogg'], volume: 0.5}),
+    new Howl({urls: ['sounds/hit2.ogg'], volume: 0.5}),
+    new Howl({urls: ['sounds/hit3.ogg'], volume: 0.5}),
+    new Howl({urls: ['sounds/hit4.ogg'], volume: 0.5}),
+    new Howl({urls: ['sounds/hit5.ogg'], volume: 0.5})
+  ],
+  'bone-crush': [
+    new Howl({urls: ['sounds/bone.ogg']})
   ]
 }
 
 function playSoundeffect (name) {
   var effects = sounds[name]
-  var choose = Math.floor(Math.random() * effects.length)
-  effects[choose].play()
+  if (effects.length > 0) {
+    var choose = Math.floor(Math.random() * effects.length)
+    effects[choose].play()
+  }
 }
