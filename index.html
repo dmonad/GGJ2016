@@ -115,7 +115,7 @@
             $('<span>, </span>').appendTo(document.body)
           }
         }
-        if (location.hash === '#1') {
+        if (!location.hash || location.hash === '#1') {
           document.querySelector('#intro').setAttribute('style', 'visibility: visible;')
           
           var sound = playSoundeffect('intro')
