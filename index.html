@@ -89,7 +89,10 @@
         $('<span>Level: </span>').appendTo(document.body)
         for (var i in levels) {
           var show = Number(i) + 1
-          $('<span><a href="./#' + show + '">' + show + '</a>, </span>').appendTo(document.body)
+          $('<span><a href="./#' + show + '">' + show + '</a></span>').appendTo(document.body)
+          if (show !== levels.length) {
+            $('<span>, </span>').appendTo(document.body)
+          }
         }
         if (location.hash === '#1') {
           document.querySelector('#intro').setAttribute('style', 'visibility: visible;')
