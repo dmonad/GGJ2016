@@ -105,7 +105,8 @@ function createBox () {
 function createLevel () {
   createBox()
   var levelname = location.hash.length > 1 ? location.hash : '#1'
-  var level = window.levels[levelname](engine)
+  var levelnumber = Number(levelname.slice(1))
+  var level = window.levels[levelnumber - 1](engine)
 
   Events.on(engine, 'tick', function (event) {
     for (var i = 0; i < level.targetZones.length; i++) {
