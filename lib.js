@@ -551,14 +551,8 @@ function playSoundeffect (name) {
   if (_soundRot[name] === undefined) _soundRot[name] = 0
   var effects = sounds[name]
   if (effects.length > 0) {
-<<<<<<< HEAD
-    var choose = Math.floor(Math.random() * effects.length)
-    effects[choose].play()
-  }
-}
-=======
     // var choose = Math.floor(Math.random() * effects.length)
     effects[(_soundRot[name]++) % effects.length].play()
   }
 }
->>>>>>> master
+
