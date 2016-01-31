@@ -138,14 +138,24 @@ function createLevel () {
   refreshScore(level)
 }
 
-var scoreText
+var attemptsText
 function refreshScore (level) {
-  if (!scoreText) {
-    scoreText = new PIXI.Text('Score: 0', {font: '24px Arial', fill: 0xff1010, align: 'center'})
-    engine.render.textContainer.addChild(scoreText)
+  if (!attemptsText) {
+    attemptsText = new PIXI.Text('Attempts: 0/' + level.maxAttempts, {font: '24px Arial', fill: 0xff1010, align: 'center'})
+    engine.render.textContainer.addChild(attemptsText)
   }
 
-  scoreText.setText('Score: ' + level.score)
+  attemptsText.setText('Attempts: ' + level.attempts + '/' + level.maxAttempts)
+  if (level.organs.length === 0) {
+    popupMessage('You Won!!')
+  }
+  if (level.attempts === level.maxAttempts) {
+    setTimeout(function (){
+      if (level.organs.length > 0) {
+        popupMessage('You Loose :(')
+      }
+    }, 3000)
+  }
 }
 
 loadFiles()
@@ -159,8 +169,6 @@ engine.enableSleeping = true
 // run the engine
 Engine.run(engine)
 
-waitForSword(engine)
-
 function clearGame () {
   while (engine.render.backgroundContainer.children[1]) { 
     engine.render.backgroundContainer.removeChild(engine.render.backgroundContainer.children[1]); 
@@ -169,5 +177,8 @@ function clearGame () {
 }
 
 $(window).on('hashchange', function() {
+  if (location.hash.slice(1,6) === 'level') {
+    location.hash = '#' + location.hash.slice(6)
+  }
   location.reload()
 });
