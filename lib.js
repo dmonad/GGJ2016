@@ -303,29 +303,33 @@ function putWaterChakra (engine, pos, strength, limit) {
   })
 }
 
+function destroyBone (world, bone) {
+  playSoundeffect('bone-crush')
+  var settings = Common.clone(particleSettings.bone)
+  var verts = []
+  for (var i = 0; i < bone.bodies.length; i++) {
+    verts = verts.concat(bone.bodies[i].vertices)
+  }
+  var bb = Bounds.create(verts)
+  settings.spawnRect = {
+    'x': bb.min.x,
+    'y': bb.min.y,
+    'w': bb.max.x - bb.min.x,
+    'h': bb.max.y - bb.min.y
+  }
+  addEmitter(settings, 'img/particle.png', 0, 0, 4000)
+  window.setTimeout(function () {
+    Composite.remove(world, bone)
+  }, 0)
+}
+
 function putMetalChakra (engine, pos) {
   return putChakra(engine, pos, 'metal', function (pos, sword) {
     var handler = function (event) {
       var pair = event.pairs[0]
       var bone = pair.bodyA._bone || pair.bodyA._bone
       if (bone !== undefined) {
-        playSoundeffect('bone-crush')
-        var settings = Common.clone(particleSettings.bone)
-        var verts = []
-        for (var i = 0; i < bone.bodies.length; i++) {
-          verts = verts.concat(bone.bodies[i].vertices)
-        }
-        var bb = Bounds.create(verts)
-        settings.spawnRect = {
-          'x': bb.min.x,
-          'y': bb.min.y,
-          'w': bb.max.x - bb.min.x,
-          'h': bb.max.y - bb.min.y
-        }
-        addEmitter(settings, 'img/particle.png', 0, 0, 4000)
-        window.setTimeout(function() {
-          Composite.remove(engine.world, bone)          
-        }, 0)
+        destroyBone(engine.world, bone)
       }
     }
 
@@ -337,6 +341,16 @@ function putMetalChakra (engine, pos) {
     })
 
     sword.render.sprite.tint = 0xFFFF00
+  })
+}
+
+function putWoodChakra (engine, pos, bone) {
+  bone.bodies.forEach(function (part) {
+    part.render.sprite.tint = 0x6C2424
+  })
+
+  return putChakra(engine, pos, 'wood', function (pos, sword) {
+    destroyBone(engine.world, bone)
   })
 }
 
