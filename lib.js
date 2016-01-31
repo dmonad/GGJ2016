@@ -268,6 +268,38 @@ function putFireChakra (engine, pos) {
   })
 }
 
+function putWaterChakra (engine, pos, strength, limit) {
+  strength = strength || 200
+  limit = limit || 15
+  return putChakra(engine, pos, 'water', function (pos, sword) {
+    var handler = function (event) {
+      engine.world.bodies.forEach(function (body) {
+        if (!['sword'].some(function (s) {
+            return body.label === s
+          })) {
+          var force = Vector.sub(body.position, sword.position)
+          var dist = Vector.magnitude(force)
+          var factor = strength / (dist * dist)
+          var resultForce = Vector.mult(Vector.normalise(force), -factor)
+          Body.applyForce(body, body.position, resultForce)
+          if (Vector.magnitude(body.velocity) > limit) {
+            body.velocity = Vector.mult(Vector.normalise(body.velocity), limit)
+          }
+        }
+      })
+    }
+
+    Events.on(engine, 'beforeUpdate', handler)
+
+    window.setTimeout(function () {
+      Events.off(engine, 'beforeUpdate', handler)
+      sword.render.sprite.tint = 0xFFFFFF
+    }, 2000)
+
+    sword.render.sprite.tint = 0x0000FF
+  })
+}
+
 var boneWidth = 116
 var boneHeadWidth = 209
 var boneHeadHeight = 146
@@ -377,6 +409,7 @@ function createOrgan (organ, x, y, scale, level) {
 
   var o = Bodies.fromVertices(x, y, [vertices], {
     collisionFilter: {group: noncolliding},
+    frictionAir: 0.1,
     render: {
       fillStyle: 'none',
       strokeStyle: '#FF0000',

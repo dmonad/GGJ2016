@@ -89,7 +89,7 @@ window.levels = {
       y: 370
     })
 
-    putFireChakra(engine, {
+    putWaterChakra(engine, {
       x: 600,
       y: 450
     })
