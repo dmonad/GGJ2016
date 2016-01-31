@@ -238,7 +238,7 @@ function activateExplodeChakra (engine, sword) {
   sword.explodeIntensity = 1
 }
 
-function putChakra (engine, pos, name, activate) {
+function putChakra (engine, pos, name, activate, value) {
   var chakra = Bodies.circle(pos.x, pos.y, 20, {
     collisionFilter: {group: noncolliding},
     restitution: 0,
@@ -440,23 +440,28 @@ var organs = {
   liver: {
     image: 'img/liver.png',
     collision: 'img/liver.svg',
+    value: 5
   },
   heart: {
     image: 'img/heart.png',
     collision: 'img/heart.svg',
+    value: 10
   },
   kidney: {
     image: 'img/kidney.png',
     collision: 'img/kidney.svg',
+    value: 8
   },
   lungs: {
     image: 'img/lungs.png',
     collision: 'img/lungs.svg',
+    value: 6
   },
   stomach: {
     image: 'img/stomach.png',
     collision: 'img/stomach.svg',
-  },
+    value: 3
+  }
 }
 
 function createOrgan (organ, x, y, scale, level) {
@@ -483,6 +488,8 @@ function createOrgan (organ, x, y, scale, level) {
   }, true)
 
   World.add(engine.world, [o])
+  
+  o.scoreValue = organ.value
 
   level.organs.push(o)
 

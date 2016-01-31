@@ -112,6 +112,7 @@ function createLevel () {
         var center = Vertices.centre(result[j].vertices)
         if (Bounds.contains(zone, center)) {
           var organ = result[j]
+          level.score += organ.scoreValue
           var sprite = engine.render.sprites['b-' + organ.id]
           level.organs.splice(level.organs.indexOf(organ), 1)
           var interval = setInterval(function () {
@@ -154,13 +155,20 @@ function createLevel () {
 }
 
 var attemptsText
+var scoreText
 function refreshScore (level) {
   if (!attemptsText) {
-    attemptsText = new PIXI.Text('Attempts: 0/' + level.maxAttempts, {font: '24px Arial', fill: 0xff1010, align: 'center'})
+    attemptsText = new PIXI.Text('Cuts: 0/' + level.maxAttempts, {font: '24px Arial', fill: 0xFFFFFF, align: 'center'})
     engine.render.textContainer.addChild(attemptsText)
   }
+  if (!scoreText) {
+    scoreText = new PIXI.Text('Score: ' + level.score, {font: '24px Arial', fill: 0xFFFFFF, align: 'center'})
+    scoreText.x = 400
+    engine.render.textContainer.addChild(scoreText)
+  }
 
-  attemptsText.setText('Attempts: ' + level.attempts + '/' + level.maxAttempts)
+  attemptsText.text = 'Attempts: ' + level.attempts + '/' + level.maxAttempts
+  scoreText.text = 'Score: ' + level.score
   if (level.organs.length === 0) {
     popupMessage('You Won!!')
   }
