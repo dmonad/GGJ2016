@@ -179,7 +179,7 @@ window.levels = [
   },
   function level5 (engine) {
     var level = {
-      attempts: 0,
+      attempts: 1,
       maxAttempts: 2,
       organs: [],
       targetZones: [{
@@ -198,12 +198,8 @@ window.levels = [
     createBone (320, 500, 770, 500, 40)
     var bone = createBone (680, 760, 1000, 370, 50)
 
-    var heart = createOrgan('heart', 170, 40, 0.2, level)
+    var heart = createOrgan('heart', 370, 40, 0.2, level)
 
-    attachWithRope(engine.world, {
-      fromPoint: {x: 850, y: 0},
-      to: heart
-    })
     putMetalChakra(engine, {
       x: 600,
       y: 450
