@@ -23,6 +23,9 @@
           display: table;
           margin: auto;
           background-color: #D2AE8D;
+          font-size: 2em;
+          font-family: bloodfont;
+          color: darkred;
       }
 
       body {
@@ -42,7 +45,7 @@
         top: -720px;
         left: 50px;
         width: 900px;
-        height: 800px;
+        height: 0;
         text-align: center;
         -webkit-animation-duration: 2.5s;
         -webkit-animation-delay: 0s;
@@ -51,13 +54,17 @@
         -moz-animation-delay: 0s;
         -moz-animation-iteration-count: 1;
       }
+      a {
+        text-decoration: none;
+        font-family: bloodfont;
+        color: darkred;
+      }
       #popup a {
         text-decoration: none;
         color: inherit;
-        font-size: 2em;
       }
       #title {
-        font-size: 16em;
+        font-size: 8em;
       }
     </style>
     <script>
@@ -71,6 +78,17 @@
         var level = Number((location.hash.length > 0 ? location.hash : '#1').slice(1))
         document.querySelector('#restart').setAttribute('href', './#level'+level)
         document.querySelector('#nextlevel').setAttribute('href', './#'+(level+1))
+      }
+      console.log('dtrn')
+      $( document ).ready(function() {
+        $('<span>Level: </span>').appendTo(document.body)
+        for (var i in levels) {
+          var show = Number(i) + 1
+          $('<span><a href="./#' + show + '">' + show + '</a>, </span>').appendTo(document.body)
+        } 
+      })
+      document.onload = function () {
+       
       }
     </script>
   </head>
