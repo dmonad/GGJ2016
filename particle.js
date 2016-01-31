@@ -34,6 +34,58 @@ function addEmitter (settings, img, x, y, time, body) {
 }
 
 var particleSettings = {
+  bone: {
+    'alpha': {
+      'start': 0.5,
+      'end': 0
+    },
+    'scale': {
+      'start': 1,
+      'end': 0.01,
+      'minimumScaleMultiplier': 1
+    },
+    'color': {
+      'start': '#dbdbdb',
+      'end': '#999999'
+    },
+    'speed': {
+      'start': 100,
+      'end': 10
+    },
+    'acceleration': {
+      'x': 0,
+      'y': 100
+    },
+    'startRotation': {
+      'min': 0,
+      'max': 360
+    },
+    'rotationSpeed': {
+      'min': 0,
+      'max': 0
+    },
+    'lifetime': {
+      'min': 1,
+      'max': 1.8
+    },
+    'blendMode': 'normal',
+    'frequency': 0.001,
+    'emitterLifetime': 0.5,
+    'maxParticles': 500,
+    'pos': {
+      'x': 0,
+      'y': 0
+    },
+    'addAtBack': false,
+    'spawnType': 'rect',
+    'spawnRect': {
+      'x': 0,
+      'y': 0,
+      'w': 20,
+      'h': 100
+    }
+  },
+
   blood: {
     'alpha': {
       'start': 0.77,

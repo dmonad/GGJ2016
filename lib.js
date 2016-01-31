@@ -190,7 +190,7 @@ function addSword (engine, pos, level) {
     var other
     if (pair.bodyA.label === 'sword' || pair.bodyA.label === 'bone') {
       other = pair.bodyB
-    } else if (pair.bodyB.label === 'sword' || pair.bodyA.label === 'bone') {
+    } else if (pair.bodyB.label === 'sword' || pair.bodyB.label === 'bone') {
       other = pair.bodyA
     }
     if (other) {
@@ -303,6 +303,43 @@ function putWaterChakra (engine, pos, strength, limit) {
   })
 }
 
+function putMetalChakra (engine, pos) {
+  return putChakra(engine, pos, 'metal', function (pos, sword) {
+    var handler = function (event) {
+      var pair = event.pairs[0]
+      var bone = pair.bodyA._bone || pair.bodyA._bone
+      if (bone !== undefined) {
+        playSoundeffect('bone-crush')
+        var settings = Common.clone(particleSettings.bone)
+        var verts = []
+        for (var i = 0; i < bone.bodies.length; i++) {
+          verts = verts.concat(bone.bodies[i].vertices)
+        }
+        var bb = Bounds.create(verts)
+        settings.spawnRect = {
+          'x': bb.min.x,
+          'y': bb.min.y,
+          'w': bb.max.x - bb.min.x,
+          'h': bb.max.y - bb.min.y
+        }
+        addEmitter(settings, 'img/particle.png', 0, 0, 4000)
+        window.setTimeout(function() {
+          Composite.remove(engine.world, bone)          
+        }, 0)
+      }
+    }
+
+    Matter.Events.on(engine, 'collisionStart', handler)
+
+    sword._onStop.push(function () {
+      Events.off(engine, 'collisionStart', handler)
+      sword.render.sprite.tint = 0xFFFFFF
+    })
+
+    sword.render.sprite.tint = 0xFFFF00
+  })
+}
+
 var boneWidth = 116
 var boneHeadWidth = 209
 var boneHeadHeight = 146
@@ -372,9 +409,12 @@ function createBone (x1, y1, x2, y2, w) {
   var angle = -Math.atan((x1 - x2) / (y1 - y2))
 
   var bone = Composite.create({bodies: [shaft, end1, end2] })
-  bone.label = 'bone'
+  shaft.label = 'boneBody'
   end1.label = 'bone'
   end2.label = 'bone'
+  shaft._bone = bone
+  end1._bone = bone
+  end2._bone = bone
   Composite.rotate(bone, angle, {x: cx, y: cy})
 
   World.add(engine.world, bone)
@@ -445,6 +485,9 @@ var sounds = {
     new Howl({urls: ['sounds/splash.ogg']})
   ],
   explode: [
+    new Howl({urls: ['sounds/splash.ogg']})
+  ],
+  'bone-crush': [
     new Howl({urls: ['sounds/splash.ogg']})
   ]
 }
