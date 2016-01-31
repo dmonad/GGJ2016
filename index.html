@@ -46,7 +46,7 @@
     </style>
     <script>
       function popupMessage (text) {
-        document.querySelector('#title').innerText = text
+        document.querySelector('#title').textContent = text
         var popup = document.querySelector('#popup')
         popup.setAttribute('style','visibility:visible;')
         popup.classList.add('animated')

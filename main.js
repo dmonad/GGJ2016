@@ -29,23 +29,18 @@ var engine = Engine.create(document.body, {
   })
 })
 
-var queue = new createjs.LoadQueue(true)
+var queue = new createjs.LoadQueue()
 
 var loadingText = new PIXI.Text('Loading...', {font: '24px Arial', fill: 0xff1010, align: 'center'})
 engine.render.textContainer.addChild(loadingText)
 
 function loadFiles () {
   for (var organ in organs) {
-    queue.loadFile(organs[organ].collision, false)
-    queue.loadFile(organs[organ].image, false)
+    queue.loadFile(organs[organ].collision)
+    queue.loadFile(organs[organ].image)
   }
 
-  queue.loadFile('img/bone_end_collision.svg', false)
-  queue.loadFile('img/bone_end.png', false)
-  queue.loadFile('img/bone.png', false)
-  queue.loadFile('img/foreground.png', false)
-  queue.loadFile('img/background.png', false)
-  queue.loadFile('img/yinyang.png', false)
+  queue.loadFile('img/bone_end_collision.svg')
 
   // queue.on('complete', function () {
     engine.render.textContainer.removeChild(loadingText)
@@ -59,7 +54,6 @@ function loadFiles () {
     })
   //})
 
-  queue.load()
 }
 
 var boneEndPath, boneEndBounds
