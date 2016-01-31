@@ -22,24 +22,6 @@ var chainStyle = {
 // chakras!!
 var explodeChakraIsActivated = false
 
-var emitters = []
-function startParticles (engine) {
-  Matter.Events.on(engine, 'tick', function addEmitter () {
-    for (var i = 0; i < emitters.length; i++) {
-      var emitter = emitters[i]
-      if (emitter._body) {
-        emitter.updateSpawnPos(emitter._body.position.x, emitter._body.position.y)
-      }
-
-      if (emitter._remove) {
-        emitters.splice(i, 1)
-        i--
-      } else {
-        emitter.update(1 / 60)
-      }
-    }
-  })
-}
 
 /*
   opts = {
@@ -59,7 +41,6 @@ function attachWithRope (world, opts) { // from, body, bodyPoint, length) {
       var i = ropeB.bodies.indexOf(self)
       Matter.Composite.removeConstraintAt(ropeB, i)
     }, 0)
-    console.log(self)
     var emitSettings = {
       'alpha': {
         'start': 0.77,
@@ -75,12 +56,12 @@ function attachWithRope (world, opts) { // from, body, bodyPoint, length) {
         'end': '#8a1111'
       },
       'speed': {
-        'start': 100,
-        'end': 50
+        'start': 400,
+        'end': 200
       },
       'acceleration': {
         'x': 0,
-        'y': 300
+        'y': 800
       },
       'startRotation': {
         'min': 30,
@@ -97,7 +78,8 @@ function attachWithRope (world, opts) { // from, body, bodyPoint, length) {
       'blendMode': 'normal',
       'frequency': 0.001,
       'emitterLifetime': 2,
-      'maxParticles': 500
+      'maxParticles': 500,
+      'spawnType ': 'burst'
     }
 
     var emitter, body, e
@@ -119,7 +101,7 @@ function attachWithRope (world, opts) { // from, body, bodyPoint, length) {
     body = ropeB.bodies[j]
     e = $.extend({}, emitSettings)
     e.pos = { x: body.position.x, y: body.position.y }
-    sounds.splash.play()
+    playSoundeffect('splash')
 
     emitter = new cloudkid.Emitter(engine.render.textContainer, [PIXI.Texture.fromImage('img/particle.png')], e)
     emitter._body = body
@@ -182,7 +164,7 @@ function attachWithRope (world, opts) { // from, body, bodyPoint, length) {
   addSword (engine, {x:0,y:0})
 */
 
-function addSword (engine, pos) {
+function addSword (engine, pos, level) {
   var sword = Bodies.circle(pos.x, pos.y, 20, {
     label: 'sword',
     restitution: 0,
@@ -215,7 +197,11 @@ function addSword (engine, pos) {
     }
 
     Matter.Events.on(mouseConstraint, 'mousedown', function (event) {
-      moveswordto = Vector.clone(event.mouse.position)
+      if (level.attempts < level.maxAttempts) {
+        level.attempts++
+        refreshScore(level)
+        moveswordto = Vector.clone(event.mouse.position)
+      }
     })
     Matter.Events.on(mouseConstraint, 'mousemove', function (event) {
       sworddirection = Vector.angle(event.mouse.position, sword.position)
@@ -275,11 +261,11 @@ function addSword (engine, pos) {
   })
 }
 
-function waitForSword (engine) {
+function waitForSword (engine, level) {
   var mouseConstraint = MouseConstraint.create(engine)
   function listener (event) {
     Matter.Events.off(mouseConstraint, 'mouseup', listener)
-    addSword(engine, Vector.clone(event.mouse.position))
+    addSword(engine, Vector.clone(event.mouse.position), level)
   }
   Matter.Events.on(mouseConstraint, 'mouseup', listener)
 }
@@ -289,24 +275,14 @@ explosion.scale.x = 0.5
 explosion.scale.y = 0.5
 
 function activateExplodeChakra (engine, pos) {
+  playSoundeffect('explode')
+  addEmitter(particleSettings.explosion2, 'img/particle.png', pos.x, pos.y, 3000)
+  addEmitter(particleSettings.smokeRing, 'img/CartoonSmoke.png', pos.x, pos.y, 3000)
+
   explosion.position = {
     x: pos.x - explosion.width / 2,
     y: pos.y - explosion.height / 2
   }
-  engine.render.container.addChild(explosion)
-  setTimeout(function () {
-    engine.render.container.removeChild(explosion)
-  }, 400)
-  Bodies.circle(pos.x, pos.y, 5, {
-    isStatic: true,
-    render: {
-      sprite: {
-        texture: 'img/explode.png',
-        xScale: 0.1,
-        yScale: 0.1
-      }
-    }
-  })
   engine.world.bodies.forEach(function (body) {
     if (!['sword'].some(function (s) {
         return body.label === s
@@ -316,7 +292,6 @@ function activateExplodeChakra (engine, pos) {
       if (dist < 600) {
         // var power = 0.01 * Math.min(Math.sqrt((600 - dist) / 600), 0.1)
         var power = 0.03 * Math.pow((600 - dist) / 600, 4)
-        console.log(power)
         force = Vector.mult(force, power)
         Body.applyForce(body, pos, force)
       }
@@ -340,6 +315,7 @@ function putExplodeChakra (engine, pos) {
   })
   chakra.label = 'explodechakra'
   chakra.activate = function () {
+    playSoundeffect('chakra')
     Matter.Composite.removeBody(engine.world, this)
     explodeChakraIsActivated = true
   }
@@ -462,7 +438,8 @@ function createOrgan (organ, x, y, scale, level) {
         texture: organ.image,
         xScale: scale,
         yScale: scale
-      }
+      },
+      emotion: Math.random() > 0.5 ? 'smile' : 'frown'
     }
   }, true)
 
@@ -474,7 +451,21 @@ function createOrgan (organ, x, y, scale, level) {
 }
 
 var sounds = {
-  splash: new Howl({
-    urls: ['sounds/splash.ogg']
-  })
+  splash: [
+    new Howl({urls: ['sounds/splash.ogg']}),
+    new Howl({urls: ['sounds/splash2.ogg']}),
+    new Howl({urls: ['sounds/splash3.ogg']})
+  ],
+  chakra: [
+    new Howl({urls: ['sounds/splash.ogg']})
+  ],
+  explode: [
+    new Howl({urls: ['sounds/splash.ogg']})
+  ]
+}
+
+function playSoundeffect (name) {
+  var effects = sounds[name]
+  var choose = Math.floor(Math.random() * effects.length)
+  effects[choose].play()
 }

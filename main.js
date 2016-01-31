@@ -47,15 +47,17 @@ function loadFiles () {
   queue.loadFile('img/background.png', false)
   queue.loadFile('img/yinyang.png', false)
 
-  queue.on('complete', function () {
+  // queue.on('complete', function () {
     engine.render.textContainer.removeChild(loadingText)
     var foreground = new PIXI.Sprite.fromImage('img/foreground.png')
     engine.render.textContainer.addChild(foreground)
     var background = new PIXI.Sprite.fromImage('img/background.png')
     engine.render.backgroundContainer.addChild(background)
-    buildPaths()
-    createLevel()
-  })
+    queue.on('complete', function () {
+      buildPaths()
+      createLevel()
+    })
+  //})
 
   queue.load()
 }
@@ -115,37 +117,66 @@ function createLevel () {
       for (var j = 0; j < result.length; j++) {
         var center = Vertices.centre(result[j].vertices)
         if (Bounds.contains(zone, center)) {
-          World.remove(engine.world, result[j])
-          level.organs.splice(level.organs.indexOf(result[j]), 1)
+          var organ = result[j]
+          var sprite = engine.render.sprites['b-' + organ.id]
+          level.organs.splice(level.organs.indexOf(organ), 1)
+          var interval = setInterval(function () {
+            sprite.alpha -= 0.1
+            if (sprite.alpha <= 0) {
+              window.clearInterval(interval)
+              World.remove(engine.world, organ)
+            }
+          }, 40)
           level.score++
           refreshScore(level)
-          break
         }
       }
     }
   })
+
   for (var i = 0; i < level.targetZones.length; i++) {
     var zone = level.targetZones[i]
-    var graphics = new PIXI.Graphics()
 
-    graphics.beginFill(0x0088FF, 0.2)
-    graphics.drawRect(zone.min.x, zone.min.y, zone.max.x - zone.min.x, zone.max.y - zone.min.y)
+    var w = zone.max.x - zone.min.x
+    var h = zone.max.y - zone.min.y
 
-    engine.render.backgroundContainer.addChild(graphics)
+    var cut = new PIXI.Sprite.fromImage('img/cut.png')
+    cut.x = zone.min.x - w / 3
+    cut.y = zone.min.y - h / 2
+    cut.width = w * 1.6
+    engine.render.backgroundContainer.addChild(cut)
+
+    /*
+      var graphics = new PIXI.Graphics()
+      graphics.beginFill(0x0088FF, 0.2)
+      graphics.drawRect(zone.min.x, zone.min.y, zone.max.x - zone.min.x, zone.max.y - zone.min.y)
+
+      engine.render.backgroundContainer.addChild(graphics)
+     */
   }
 
   startParticles(engine)
   refreshScore(level)
 }
 
-var scoreText
+var attemptsText
 function refreshScore (level) {
-  if (!scoreText) {
-    scoreText = new PIXI.Text('Score: 0', {font: '24px Arial', fill: 0xff1010, align: 'center'})
-    engine.render.textContainer.addChild(scoreText)
+  if (!attemptsText) {
+    attemptsText = new PIXI.Text('Attempts: 0/' + level.maxAttempts, {font: '24px Arial', fill: 0xff1010, align: 'center'})
+    engine.render.textContainer.addChild(attemptsText)
   }
 
-  scoreText.setText('Score: ' + level.score)
+  attemptsText.setText('Attempts: ' + level.attempts + '/' + level.maxAttempts)
+  if (level.organs.length === 0) {
+    popupMessage('You Won!!')
+  }
+  if (level.attempts === level.maxAttempts) {
+    setTimeout(function (){
+      if (level.organs.length > 0) {
+        popupMessage('You Loose :(')
+      }
+    }, 3000)
+  }
 }
 
 loadFiles()
@@ -159,15 +190,24 @@ engine.enableSleeping = true
 // run the engine
 Engine.run(engine)
 
-waitForSword(engine)
-
 function clearGame () {
-  while (engine.render.backgroundContainer.children[1]) { 
-    engine.render.backgroundContainer.removeChild(engine.render.backgroundContainer.children[1]); 
+  while (engine.render.backgroundContainer.children[1]) {
+    engine.render.backgroundContainer.removeChild(engine.render.backgroundContainer.children[1])
   }
   Matter.World.clear(engine.world, false, true)
 }
 
 $(window).on('hashchange', function() {
+  if (location.hash.slice(1,6) === 'level') {
+    location.hash = '#' + location.hash.slice(6)
+  }
   location.reload()
-});
+})
+
+
+// Don't fucking delete my awesome mouse listener!
+// There are comments you know ?
+Matter.Events.on(MouseConstraint.create(engine), 'mousemove', function (event) {
+  console.log(JSON.stringify(event.mouse.position))
+})
+
