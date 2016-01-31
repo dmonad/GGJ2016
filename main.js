@@ -216,12 +216,12 @@ function refreshScore (x, y) {
   var sign = currentScore > 0 ? ' + ' : (currentScore < 0 ? ' - ' : '')
   scoreText.text = 'Score: ' + score + (currentScore !== 0 ? sign + Math.abs(currentScore) + (currentMult > 1 ? 'x' + currentMult : '') : '')
   if (level.organs.length === 0) {
-    popupMessage('You Won!!')
+    popupMessage('Honorable!')
   }
   if (level.attempts === level.maxAttempts) {
     setTimeout(function () {
       if (level.organs.length > 0) {
-        popupMessage('You Loose :(')
+        popupMessage('Disgraced!')
       }
     }, 3000)
   }
@@ -255,5 +255,5 @@ $(window).on('hashchange', function () {
 // Don't fucking delete my awesome mouse listener!
 // There are comments you know ?
 Matter.Events.on(MouseConstraint.create(engine), 'mousemove', function (event) {
-  console.log(JSON.stringify(event.mouse.position))
+  // console.log(JSON.stringify(event.mouse.position))
 })
