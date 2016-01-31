@@ -38,7 +38,7 @@
         src: url(fonts/strange/strange.ttf);
       }
 
-      #popup {
+      .popup {
         font-family: bloodfont;
         color: darkred;
         position: relative;
@@ -47,6 +47,8 @@
         width: 900px;
         height: 0;
         text-align: center;
+      }
+      #popup {
         -webkit-animation-duration: 2.5s;
         -webkit-animation-delay: 0s;
         -webkit-animation-iteration-count: 1;
@@ -66,6 +68,9 @@
       #title {
         font-size: 8em;
       }
+      h1 {
+        font-size: 2em;
+      }
     </style>
     <script>
       function popupMessage (text) {
@@ -79,24 +84,32 @@
         document.querySelector('#restart').setAttribute('href', './#level'+level)
         document.querySelector('#nextlevel').setAttribute('href', './#'+(level+1))
       }
-      console.log('dtrn')
+
       $( document ).ready(function() {
         $('<span>Level: </span>').appendTo(document.body)
         for (var i in levels) {
           var show = Number(i) + 1
           $('<span><a href="./#' + show + '">' + show + '</a>, </span>').appendTo(document.body)
-        } 
+        }
+        if (location.hash === '#1') {
+          document.querySelector('#intro').setAttribute('style', 'visibility: visible;')
+          setTimeout(function () {
+            document.querySelector('#intro').setAttribute('style', 'visibility: hidden;')
+          }, 3000)
+        }
       })
-      document.onload = function () {
-       
-      }
+
     </script>
   </head>
   <body>
     <script src="main.js"></script>
-    <div id="popup" style="visibility: hidden;">
+    <div id="popup" class="popup" style="visibility: hidden;">
       <div id="title">You Won!!</div>
       <a id="restart"> Restart </a> <a id="nextlevel" style="padding-left:50px;"> Next Level</a>
+    </div>
+    <div id="intro" class="popup" style="visibility: hidden;">
+      <h1>Game of Hara Kiri!!</h1>
+      <p> You have braught dishonor to your Family! Commit Hara Kiri and free </p>
     </div>
     <!--div id="lost">
       You Lost!! 
