@@ -12,11 +12,60 @@
     <script src="particle.js"></script>
     <script src="lib.js"></script>
     <script src="levels.js"></script>
+    <link rel="stylesheet" href="bower_components/animate.css/animate.min.css">
     <style>
       html, body { height: 100%; margin: 0; }
+      @font-face {
+        font-family: bloodfont;
+        src: url(fonts/strange/strange.ttf);
+      }
+
+      #popup {
+        font-family: bloodfont;
+        color: darkred;
+        position: absolute;
+        top: 70px;
+        left: 50px;
+        width: 900px;
+        height: 800px;
+        text-align: center;
+        -webkit-animation-duration: 2.5s;
+        -webkit-animation-delay: 0s;
+        -webkit-animation-iteration-count: 1;
+        -moz-animation-duration: 2.5s;
+        -moz-animation-delay: 0s;
+        -moz-animation-iteration-count: 1;
+      }
+      #popup a {
+        text-decoration: none;
+        color: inherit;
+      }
+      #title {
+        font-size: 16em;
+      }
     </style>
+    <script>
+      function popupMessage (text) {
+        document.querySelector('#title').innerText = text
+        var popup = document.querySelector('#popup')
+        popup.setAttribute('style','visibility:visible;')
+        popup.classList.add('animated')
+        popup.classList.add('bounceIn')
+
+        var level = Number((location.hash.length > 0 ? location.hash : '#1').slice(1))
+        document.querySelector('#restart').setAttribute('href', './#level'+level)
+        document.querySelector('#nextlevel').setAttribute('href', './#'+(level+1))
+      }
+    </script>
   </head>
   <body>
     <script src="main.js"></script>
+    <div id="popup" style="visibility: hidden;">
+      <div id="title">You Won!!</div>
+      <a id="restart"> Restart </a> <a id="nextlevel" style="padding-left:50px;"> Next Level</a>
+    </div>
+    <!--div id="lost">
+      You Lost!! 
+    </div-->
   </body>
 </html>

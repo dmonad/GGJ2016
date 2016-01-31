@@ -105,7 +105,7 @@ function attachWithRope (world, opts) { // from, body, bodyPoint, length) {
   addSword (engine, {x:0,y:0})
 */
 
-function addSword (engine, pos) {
+function addSword (engine, pos, level) {
   var sword = Bodies.circle(pos.x, pos.y, 20, {
     label: 'sword',
     restitution: 0,
@@ -138,7 +138,11 @@ function addSword (engine, pos) {
     }
 
     Matter.Events.on(mouseConstraint, 'mousedown', function (event) {
-      moveswordto = Vector.clone(event.mouse.position)
+      if (level.attempts < level.maxAttempts) {
+        level.attempts++
+        refreshScore(level)
+        moveswordto = Vector.clone(event.mouse.position)
+      }
     })
     Matter.Events.on(mouseConstraint, 'mousemove', function (event) {
       sworddirection = Vector.angle(event.mouse.position, sword.position)
@@ -198,11 +202,11 @@ function addSword (engine, pos) {
   })
 }
 
-function waitForSword (engine) {
+function waitForSword (engine, level) {
   var mouseConstraint = MouseConstraint.create(engine)
   function listener (event) {
     Matter.Events.off(mouseConstraint, 'mouseup', listener)
-    addSword(engine, Vector.clone(event.mouse.position))
+    addSword(engine, Vector.clone(event.mouse.position), level)
   }
   Matter.Events.on(mouseConstraint, 'mouseup', listener)
 }

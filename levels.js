@@ -1,15 +1,26 @@
 window.levels = {
   '#1': function level1 (engine) {
     var level = {
+      attempts: 0,
+      maxAttempts: 3,
       organs: [],
       targetZones: [{
         min: {
-          x: 540,
-          y: 90
+          x: 50,
+          y: 500
         },
         max: {
-          x: 710,
-          y: 190
+          x: 200,
+          y: 560
+        }
+      }, {
+        min: {
+          x: 500,
+          y: 60
+        },
+        max: {
+          x: 700,
+          y: 150
         }
       }],
       score: 0
@@ -42,6 +53,8 @@ window.levels = {
       x: 600,
       y: 450
     })
+    waitForSword(engine, level)
+
     return level
   },
   '#2': function level2 (engine) {
