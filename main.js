@@ -201,3 +201,11 @@ $(window).on('hashchange', function() {
   }
   location.reload()
 })
+
+
+// Don't fucking delete my awesome mouse listener!
+// There are comments you know ?
+Matter.Events.on(MouseConstraint.create(engine), 'mousemove', function (event) {
+  console.log(JSON.stringify(event.mouse.position))
+})
+
