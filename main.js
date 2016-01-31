@@ -213,7 +213,7 @@ function refreshScore (x, y) {
   }, 2000)
 
 
-  attemptsText.text = 'Attempts: ' + level.attempts + '/' + level.maxAttempts
+  attemptsText.text = 'Cuts: ' + level.attempts + '/' + level.maxAttempts
   var sign = currentScore > 0 ? ' + ' : (currentScore < 0 ? ' - ' : '')
   scoreText.text = 'Score: ' + score + (currentScore !== 0 ? sign + Math.abs(currentScore) + (currentMult > 1 ? 'x' + currentMult : '') : '')
   if (level.organs.length === 0) {
