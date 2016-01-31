@@ -46,7 +46,7 @@
     </style>
     <script>
       function popupMessage (text) {
-        document.querySelector('#title').innerText = text
+        document.querySelector('#title').textContent = text
         var popup = document.querySelector('#popup')
         popup.setAttribute('style','visibility:visible;')
         popup.classList.add('animated')
@@ -61,11 +61,8 @@
   <body>
     <script src="main.js"></script>
     <div id="popup" style="visibility: hidden;">
-      <div id="title">You Won!!</div>
+      <div id="title"></div>
       <a id="restart"> Restart </a> <a id="nextlevel" style="padding-left:50px;"> Next Level</a>
     </div>
-    <!--div id="lost">
-      You Lost!! 
-    </div-->
   </body>
 </html>
