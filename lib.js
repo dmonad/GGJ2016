@@ -102,7 +102,7 @@ function attachWithRope (world, opts) { // from, body, bodyPoint, length) {
     body = ropeB.bodies[j]
     e = $.extend({}, emitSettings)
     e.pos = { x: body.position.x, y: body.position.y }
-    sounds.splash.play()
+    playSoundeffect('splash')
 
     emitter = new cloudkid.Emitter(engine.render.textContainer, [PIXI.Texture.fromImage('img/particle.png')], e)
     emitter._body = body
@@ -272,6 +272,7 @@ explosion.scale.x = 0.5
 explosion.scale.y = 0.5
 
 function activateExplodeChakra (engine, pos) {
+  playSoundeffect('explode')
   addEmitter(particleSettings.explosion2, 'img/particle.png', pos.x, pos.y, 3000)
   addEmitter(particleSettings.smokeRing, 'img/CartoonSmoke.png', pos.x, pos.y, 3000)
 
@@ -312,6 +313,7 @@ function putExplodeChakra (engine, pos) {
   })
   chakra.label = 'explodechakra'
   chakra.activate = function () {
+    playSoundeffect('chakra')
     Matter.Composite.removeBody(engine.world, this)
     explodeChakraIsActivated = true
   }
@@ -446,7 +448,21 @@ function createOrgan (organ, x, y, scale, level) {
 }
 
 var sounds = {
-  splash: new Howl({
-    urls: ['sounds/splash.ogg']
-  })
+  splash: [
+    new Howl({urls: ['sounds/splash.ogg']}),
+    new Howl({urls: ['sounds/splash2.ogg']}),
+    new Howl({urls: ['sounds/splash3.ogg']})
+  ],
+  chakra: [
+    new Howl({urls: ['sounds/splash.ogg']})
+  ],
+  explode: [
+    new Howl({urls: ['sounds/splash.ogg']})
+  ]
+}
+
+function playSoundeffect (name) {
+  var effects = sounds[name]
+  var choose = Math.floor(Math.random() * effects.length)
+  effects[choose].play()
 }
