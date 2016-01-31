@@ -47,15 +47,17 @@ function loadFiles () {
   queue.loadFile('img/background.png', false)
   queue.loadFile('img/yinyang.png', false)
 
-  queue.on('complete', function () {
+  // queue.on('complete', function () {
     engine.render.textContainer.removeChild(loadingText)
     var foreground = new PIXI.Sprite.fromImage('img/foreground.png')
     engine.render.textContainer.addChild(foreground)
     var background = new PIXI.Sprite.fromImage('img/background.png')
     engine.render.backgroundContainer.addChild(background)
-    buildPaths()
-    createLevel()
-  })
+    queue.on('complete', function () {
+      buildPaths()
+      createLevel()
+    })
+  //})
 
   queue.load()
 }
